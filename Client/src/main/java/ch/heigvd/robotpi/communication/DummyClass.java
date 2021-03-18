@@ -1,4 +1,4 @@
-package ch.hiegvd.robotpi.communication;
+package ch.heigvd.robotpi.communication;
 /*
  * @File DummyClass.java
  * @Authors : David González León
