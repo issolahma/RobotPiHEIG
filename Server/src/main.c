@@ -9,3 +9,9 @@ Taches:
 -Lire le fichier de configuration:init
 -Gérer la caméra:camera
 */
+
+#include <stdio.h>
+
+int main() {
+	printf("Hello World!\n");
+}

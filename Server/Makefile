@@ -1,24 +1,36 @@
-TOOLCHAIN = arm-linux-gnueabi
+TOOLCHAIN_DIR = /opt/cross-pi-gcc
+TOOLCHAIN = arm-linux-gnueabihf
+SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)
+BUILDTOOLS = $(TOOLCHAIN_DIR)/bin/$(TOOLCHAIN)
+
 CC = gcc
 LD = ld
-CFLAGS = -g
-LDFLAGS = 
-TARGETFOLDER = bin/
+CFLAGS = -g --sysroot=$(SYSROOT)
+LDFLAGS = --sysroot=$(SYSROOT) -lc
+TARGETFOLDER = bin
 APPNAME = RoboPiServer
 
-FILES = main.o motor.o server.o protocol.o
+SUBDIR = src test
+OUT_DIR = ./bin
+OBJ_DIR = ./build
+
+SRCS = $(wildcard *.c $(foreach fd, $(SUBDIR), $(fd)/*.c))
+OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:c=o))
+
+.PHONY: clean
 
 all: $(APPNAME)
 
-$(APPNAME): $(FILES)
-	$(TOOLCHAIN)-$(LINKER) $(LDFLAGS) $(FILES) -o $(TARGETFOLDER)/$@
+$(APPNAME): $(OBJS)
+	$(BUILDTOOLS)-$(LD) $(OBJS) $(LDFLAGS) -o $(OUT_DIR)/$@
 
-%.o: %.c %.h
-	$(TOOLCHAIN)-$(CC) $(CFLAGS) $^ -o $@
+$(OBJ_DIR)/%.o: %.c
+	mkdir -p $(@D)
+	$(BUILDTOOLS)-$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
-	rm -rf $(TARGETFOLDER)
-	rm -rf *.o
+	rm -rf $(OUT_DIR)/*
+	rm -rf $(OBJ_DIR)/*
 
 test:
 
