@@ -17,12 +17,12 @@ $(APPNAME): $(FILES)
 	$(TOOLCHAIN)-$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -rf /bin
+	rm -rf $(TARGETFOLDER)
 	rm -rf *.o
 
 test:
 
 new_file:
-	echo "Entrez le nom des fichiers que vous voulez créer"
-	read fileName
-	touch src/$$filename.c
+	@echo "Entrez le nom des fichiers que vous voulez créer"
+	@read fileName; \
+	touch src/$$fileName.c src/include/$$fileName.h test/test_$$fileName.c
