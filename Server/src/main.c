@@ -12,6 +12,7 @@ Taches:
 
 #include <stdio.h>
 #include "include/init.h"
+#include <sys/socket.h>
 
 int main() {
 	printf("Hello World!\n");

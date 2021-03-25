@@ -1,12 +1,12 @@
 TOOLCHAIN = armv8-rpi3-linux-gnueabihf
 TOOLCHAIN_DIR = /opt/x-tools/$(TOOLCHAIN)
-SYSROOT = /opt/sysroot-$(TOOLCHAIN)
+SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/sysroot/
 BUILDTOOLS = $(TOOLCHAIN_DIR)/bin/$(TOOLCHAIN)
 
 CC = gcc
 LD = ld
-CFLAGS = -g --sysroot=$(SYSROOT)
-LDFLAGS = --sysroot=$(SYSROOT)
+CFLAGS = -g
+LDFLAGS = -lc
 TARGETFOLDER = bin
 APPNAME = RoboPiServer
 
