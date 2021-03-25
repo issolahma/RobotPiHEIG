@@ -11,6 +11,7 @@ Taches:
 */
 
 #include <stdio.h>
+#include "include/init.h"
 
 int main() {
 	printf("Hello World!\n");
