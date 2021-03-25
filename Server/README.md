@@ -4,9 +4,9 @@ The source for the server/robot part of the RoboPiHEIG project.
 
 ##  Toolchain setup
 
-We use the toolchain provided by the [RPi-Cpp-Toolchain](https://github.com/tttapa/RPi-Cpp-Toolchain). It uses docker to retrieve and generate the appropriate toolchain and sysroot for the Raspberry Pi Robot.
+We use the toolchain provided by the [RPi-Cpp-Toolchain](https://github.com/tttapa/RPi-Cpp-Toolchain) project. It uses docker to retrieve and generate the appropriate toolchain and sysroot for the Raspberry Pi Robot.
 
-To do cross compilation, we need a *toolchain* and a *sysroot*. The toolchain contains the compiler suite for our target architecture. The sysroot is a minimal copy of the target filesystem. It is need
+To do cross compilation, we need a *toolchain* and a *sysroot*. The toolchain contains the compiler suite for our target architecture. The sysroot is a minimal copy of the target filesystem.
 
 1. Clone the RPi-Cpp-Toolchain :
 
