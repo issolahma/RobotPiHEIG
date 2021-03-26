@@ -5,7 +5,7 @@ BUILDTOOLS = $(TOOLCHAIN_DIR)/bin/$(TOOLCHAIN)
 
 CC = gcc
 LD = ld
-CFLAGS = -g
+CFLAGS = -g -Wall
 LDFLAGS = -lc
 TARGETFOLDER = bin
 APPNAME = RoboPiServer
@@ -19,10 +19,10 @@ OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:c=o))
 
 .PHONY: clean
 
-all: $(APPNAME)
+all: $(OUT_DIR)/$(APPNAME)
 
-$(APPNAME): $(OBJS)
-	$(BUILDTOOLS)-$(CC) $(OBJS) $(LDFLAGS) -o $(OUT_DIR)/$@
+$(OUT_DIR)/$(APPNAME): $(OBJS)
+	$(BUILDTOOLS)-$(CC) $(OBJS) $(LDFLAGS) -o $@
 
 $(OBJ_DIR)/%.o: %.c
 	mkdir -p $(@D)
