@@ -5,8 +5,10 @@
  */
 package ch.heigvd.robotpi;
 
-public class FakeMain {
+import ch.heigvd.robotpi.userinterface.Launcher;
 
+public class FakeMain {
    public static void main(String[] args) {
+      Launcher.main(args);
    }
 }
