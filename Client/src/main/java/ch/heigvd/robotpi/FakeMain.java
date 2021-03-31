@@ -6,7 +6,7 @@
 package ch.heigvd.robotpi;
 
 public class FakeMain {
-   public static void main(String[] args) {
 
+   public static void main(String[] args) {
    }
 }
