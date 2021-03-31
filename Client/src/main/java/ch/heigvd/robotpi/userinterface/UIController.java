@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class UIController {
    private Scene scene;
@@ -20,10 +21,17 @@ public class UIController {
 
    public void setScene(Scene scene) {
       this.scene = scene;
+
    }
 
    public void load(Stage primaryStage) {
       primaryStage.setScene(scene);
+      primaryStage.showingProperty().addListener(((observableValue, oldValue, showing) -> {
+         if (showing){
+            primaryStage.setMinHeight(primaryStage.getHeight());
+            primaryStage.setMinWidth(primaryStage.getWidth());
+         }
+      }));
       primaryStage.setTitle("Robot PI HEIG");
    }
 
