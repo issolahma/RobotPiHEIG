@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class Server {
+public class Client {
     private Socket clientSocket;
     private PrintWriter out;
     private BufferedReader in;
@@ -29,7 +29,7 @@ public class Server {
         return isConnected;
     }
 
-    public void disconnect() throws IOException {
+    public void disconnect() {
         try {
             in.close();
             out.close();
@@ -39,7 +39,15 @@ public class Server {
         }
     }
 
-    public void goForward() {}
+    //lancer des exception dans le cas ou serveur ne reagit pas comme prevu
+
+    public void goForward() throws CommException, IOException {
+            out.println("FWD");
+            if (!in.readLine().equals("FWD_OK")) {
+                throw new CommException();
+            }
+    }
+
     public void goBackward() {}
     public void goLeft() {}
     public void goRight() {}
