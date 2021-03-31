@@ -24,7 +24,7 @@ public class Launcher extends Application {
       uiController.setScene(loginScene);
 
       uiController.load(stage);
-      stage.setScene(loginScene);
       stage.show();
+      stage.setMaximized(true);
    }
 }
