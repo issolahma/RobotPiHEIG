@@ -72,7 +72,7 @@
                             </transformer>
                         </transformers>
                         <shadedArtifactAttached>true</shadedArtifactAttached>
-                        <shadedClassifierName>launcher</shadedClassifierName>
+                        <shadedClassifierName>Final</shadedClassifierName>
                     </configuration>
                 </execution>
             </executions>
