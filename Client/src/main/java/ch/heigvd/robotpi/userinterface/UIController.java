@@ -6,13 +6,18 @@
 package ch.heigvd.robotpi.userinterface;
 
 import ch.heigvd.robotpi.communication.Client;
+import ch.heigvd.robotpi.communication.CommException;
+import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 /**
  * The controller of the main window of the client's app
@@ -21,6 +26,14 @@ public class UIController {
    private Scene scene;
    private Client client;
    private ConnectedWorker worker;
+
+   /**
+    * Boolean to know when a key is pressed
+    */
+   private Boolean upPressed = false;
+   private boolean rightPressed = false;
+   private boolean leftPressed = false;
+   private boolean downPressed = false;
 
    @FXML private RadioButton RBConnectedStatus;
    @FXML private TextField TFConnectionAddress;
@@ -32,7 +45,43 @@ public class UIController {
     */
    public void setScene(Scene scene) {
       this.scene = scene;
-
+      scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+         switch (keyEvent.getCode()) {
+            case LEFT:
+               leftPressed = true;
+               break;
+            case RIGHT:
+               rightPressed = true;
+               break;
+            case DOWN:
+               downPressed = true;
+               break;
+            case UP:
+               upPressed = true;
+               break;
+            default:
+               break;
+         }
+      });
+      scene.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
+         switch (keyEvent.getCode()) {
+            case LEFT:
+               leftPressed = false;
+               break;
+            case RIGHT:
+               rightPressed = false;
+               break;
+            case DOWN:
+               downPressed = false;
+               break;
+            case UP:
+               upPressed = false;
+               break;
+            default:
+               break;
+         }
+      });
+      scene.getRoot().requestFocus();
    }
 
    /**
@@ -52,6 +101,42 @@ public class UIController {
          }
       }));
       primaryStage.setTitle("Robot PI HEIG");
+      //handles key pressing
+      AnimationTimer timer = new AnimationTimer() {
+         @Override
+         public void handle(long l) {
+            try {
+               if (upPressed) {
+                  if (leftPressed) {
+                     client.goFrontLeft();
+                  } else if (rightPressed) {
+                     client.goFrontRight();
+                  } else if (!downPressed) {
+                     client.goForward();
+                  }
+               } else if (downPressed) {
+                  if (leftPressed) {
+                     client.goBackwardsLeft();
+                  } else if (rightPressed) {
+                     client.goBackwardsRight();
+                  } else {
+                     client.goBackward();
+                  }
+               } else if (leftPressed) {
+                  if (!rightPressed) {
+                     client.goLeft();
+                  }
+               } else if (rightPressed) {
+                  client.goRight();
+               }
+            } catch (IOException e) {
+               e.printStackTrace();
+            } catch (CommException e) {
+               e.printStackTrace();
+            }
+         }
+      };
+      timer.start();
    }
 
    /**
