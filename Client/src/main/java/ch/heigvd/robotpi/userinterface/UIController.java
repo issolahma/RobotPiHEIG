@@ -14,6 +14,9 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+/**
+ * The controller of the main window of the client's app
+ */
 public class UIController {
    private Scene scene;
    private Client client;
@@ -22,13 +25,24 @@ public class UIController {
    @FXML private RadioButton RBConnectedStatus;
    @FXML private TextField TFConnectionAddress;
 
+   /**
+    * Sets the scene linked to this controller
+    *
+    * @param scene the scene
+    */
    public void setScene(Scene scene) {
       this.scene = scene;
 
    }
 
+   /**
+    * Loads onto the stage the scene, and executes the basic setup for the ui
+    *
+    * @param primaryStage the primary stage
+    */
    public void load(Stage primaryStage) {
       client = new Client();
+      worker = new ConnectedWorker();
       RBConnectedStatus.fire();
       primaryStage.setScene(scene);
       primaryStage.showingProperty().addListener(((observableValue, oldValue, showing) -> {
@@ -38,6 +52,13 @@ public class UIController {
          }
       }));
       primaryStage.setTitle("Robot PI HEIG");
+   }
+
+   /**
+    * Closes the ui
+    */
+   public void close() {
+      worker.signalShutdown();
    }
 
    @FXML
@@ -54,8 +75,7 @@ public class UIController {
                                   "The ip adress you wrote does not coincide with that of a robot. Please check the " +
                                   "ip adress of the robot and try again.");
          } else {
-            worker.setConnected(true);
-            worker.notify();
+            worker.setConnected();
          }
       } else {
          Util.createAlertFrame(Alert.AlertType.ERROR, "Not an ip adress", "Not an ip adress",
@@ -64,25 +84,41 @@ public class UIController {
 
    }
 
+   /**
+    * The worker used to keep the connected RadioButton up to date
+    */
    class ConnectedWorker implements Runnable {
       private boolean connected;
       private boolean running = true;
 
+      /**
+       * SSignals to the worker that the UI is being closed, and that it needs to stop running
+       */
       public void signalShutdown() {
          this.running = false;
       }
 
+      /**
+       * Informs of the status of the connection to the robot
+       *
+       * @return true if the Client is connected to a robot, false otherwise
+       */
       public boolean isConnected() {
          return connected;
       }
 
-      public void setConnected(boolean connected) {
-         this.connected = connected;
+
+      /**
+       * Informs the worker that a connection has been made
+       */
+      public void setConnected() {
+         this.connected = true;
+         this.notify();
       }
 
       @Override
       public void run() {
-         while (true) {
+         while (running) {
             if (!connected) {
                try {
                   this.wait();
@@ -102,12 +138,8 @@ public class UIController {
                   e.printStackTrace();
                }
             }
-            if (!running) {
-               return;
-            }
          }
 
       }
    }
-
 }
