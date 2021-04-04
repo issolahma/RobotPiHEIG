@@ -106,28 +106,30 @@ public class UIController {
          @Override
          public void handle(long l) {
             try {
-               if (upPressed) {
-                  if (leftPressed) {
-                     client.goFrontLeft();
+               if (worker.connected) {
+                  if (upPressed) {
+                     if (leftPressed) {
+                        client.goFrontLeft();
+                     } else if (rightPressed) {
+                        client.goFrontRight();
+                     } else if (!downPressed) {
+                        client.goForward();
+                     }
+                  } else if (downPressed) {
+                     if (leftPressed) {
+                        client.goBackwardsLeft();
+                     } else if (rightPressed) {
+                        client.goBackwardsRight();
+                     } else {
+                        client.goBackward();
+                     }
+                  } else if (leftPressed) {
+                     if (!rightPressed) {
+                        client.goLeft();
+                     }
                   } else if (rightPressed) {
-                     client.goFrontRight();
-                  } else if (!downPressed) {
-                     client.goForward();
+                     client.goRight();
                   }
-               } else if (downPressed) {
-                  if (leftPressed) {
-                     client.goBackwardsLeft();
-                  } else if (rightPressed) {
-                     client.goBackwardsRight();
-                  } else {
-                     client.goBackward();
-                  }
-               } else if (leftPressed) {
-                  if (!rightPressed) {
-                     client.goLeft();
-                  }
-               } else if (rightPressed) {
-                  client.goRight();
                }
             } catch (IOException e) {
                e.printStackTrace();
