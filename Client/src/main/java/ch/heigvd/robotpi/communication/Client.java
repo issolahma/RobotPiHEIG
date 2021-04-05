@@ -39,6 +39,13 @@ public class Client {
         }
     }
 
+    public void ping() throws IOException, CommException {
+        out.println("PING");
+        if (!in.readLine().equals("PING")) {
+            throw new CommException();
+        }
+    }
+
     //lancer des exception dans le cas ou serveur ne reagit pas comme prevu
 
     public void goForward() throws CommException, IOException {
@@ -48,11 +55,33 @@ public class Client {
             }
     }
 
-    public void goBackward() {}
-    public void goLeft() {}
-    public void goRight() {}
+    public void goBackward() throws IOException, CommException {
+        out.println("BKWD");
+        if (!in.readLine().equals("BKWD_OK")) {
+            throw new CommException();
+        }
+    }
+    public void goLeft() throws IOException, CommException {
+        out.println("ROTATE_LEFT");
+        if (!in.readLine().equals("ROTATE_LEFT_OK")) {
+            throw new CommException();
+        }
+    }
+    public void goRight() throws IOException, CommException {
+        out.println("ROTATE_RIGHT");
+        if (!in.readLine().equals("ROTATE_RIGHT_OK")) {
+            throw new CommException();
+        }
+    }
+
+    //TODO : a voir avec le protocole pour ces méthodes et la classe interne d'erreur
     public void goFrontLeft() {}
     public void goFrontRight() {}
     public void goBackwardsRight() {}
     public void goBackwardsLeft() {}
+
+    public class CommException extends Exception {
+
+    }
+
 }
