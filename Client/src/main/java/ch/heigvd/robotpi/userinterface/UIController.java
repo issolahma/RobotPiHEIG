@@ -11,9 +11,7 @@ import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
@@ -35,7 +33,17 @@ public class UIController {
    private boolean leftPressed = false;
    private boolean downPressed = false;
 
-   @FXML private RadioButton RBConnectedStatus;
+   @FXML private Button BFrontLeft;
+   @FXML private Button BFront;
+   @FXML private Button BFrontRight;
+   @FXML private Button BLeft;
+   @FXML private Button BRight;
+   @FXML private Button BBackwardsLeft;
+   @FXML private Button BBackwards;
+   @FXML private Button BBackwardsRight;
+
+
+   @FXML private Label LConnectionStatus;
    @FXML private TextField TFConnectionAddress;
 
    /**
@@ -82,6 +90,7 @@ public class UIController {
          }
       });
       scene.getRoot().requestFocus();
+
    }
 
    /**
@@ -92,7 +101,6 @@ public class UIController {
    public void load(Stage primaryStage) {
       client = new Client();
       worker = new ConnectedWorker();
-      RBConnectedStatus.fire();
       primaryStage.setScene(scene);
       primaryStage.showingProperty().addListener(((observableValue, oldValue, showing) -> {
          if (showing) {
@@ -213,11 +221,11 @@ public class UIController {
                   e.printStackTrace();
                }
             }
-            RBConnectedStatus.fire();
+            LConnectionStatus.setText("Connected");
             while (connected) {
                if (!client.isConnected()) {
                   connected = false;
-                  RBConnectedStatus.fire();
+                  LConnectionStatus.setText("Disconnected");
                }
                try {
                   Thread.sleep(20000);
