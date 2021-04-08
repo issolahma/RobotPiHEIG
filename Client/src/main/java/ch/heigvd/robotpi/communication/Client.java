@@ -1,5 +1,6 @@
 package ch.heigvd.robotpi.communication;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,49 +40,82 @@ public class Client {
         }
     }
 
-    public void ping() throws IOException, CommException {
+    //TODO catch les ioException et throw les bonnes exc
+
+    public void ping() throws IOException, RobotException {
         out.println("PING");
         if (!in.readLine().equals("PING")) {
-            throw new CommException();
+            throw new RobotException();
         }
     }
 
     //lancer des exception dans le cas ou serveur ne reagit pas comme prevu
 
-    public void goForward() throws CommException, IOException {
-            out.println("FWD");
-            if (!in.readLine().equals("FWD_OK")) {
-                throw new CommException();
-            }
+    public void goForward() throws RobotException, IOException {
+        out.println("FWD");
+        if (!in.readLine().equals("FWD_OK")) {
+            throw new RobotException();
+        }
     }
 
-    public void goBackward() throws IOException, CommException {
+    public void goBackward() throws IOException, RobotException {
         out.println("BKWD");
         if (!in.readLine().equals("BKWD_OK")) {
-            throw new CommException();
+            throw new RobotException();
         }
     }
-    public void goLeft() throws IOException, CommException {
+
+    public void goLeft() throws IOException, RobotException {
         out.println("ROTATE_LEFT");
         if (!in.readLine().equals("ROTATE_LEFT_OK")) {
-            throw new CommException();
+            throw new RobotException();
         }
     }
-    public void goRight() throws IOException, CommException {
+
+    public void goRight() throws IOException, RobotException {
         out.println("ROTATE_RIGHT");
         if (!in.readLine().equals("ROTATE_RIGHT_OK")) {
-            throw new CommException();
+            throw new RobotException();
+        }
+    }
+
+    public void stop() throws IOException, RobotException {
+        out.println("STOP");
+        if (!in.readLine().equals("STOP")) {
+            throw new RobotException();
         }
     }
 
     //TODO : a voir avec le protocole pour ces méthodes et la classe interne d'erreur
-    public void goFrontLeft() {}
-    public void goFrontRight() {}
-    public void goBackwardsRight() {}
-    public void goBackwardsLeft() {}
+    public void goFrontLeft() {
+    }
+
+    public void goFrontRight() {
+    }
+
+    public void goBackwardsRight() {
+    }
+
+    public void goBackwardsLeft() {
+    }
 
     public class CommException extends Exception {
+    }
 
+    public class CantConnectException extends Exception {
+        // pb connexion en general
+    }
+
+    public class IncorrectDeviceException extends Exception {
+        // qqn avec IP mais Robot pi
+    }
+
+    public class LostConnectionException extends Exception {
+        //pb ping connexion
+    }
+
+    public class RobotException extends Exception {
+        // par ex si robot envoi mauvaise reponse, pb cote robot en general
     }
 
 }
