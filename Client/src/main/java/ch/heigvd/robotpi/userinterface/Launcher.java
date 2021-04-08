@@ -11,6 +11,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Launcher extends Application {
+   private UIController controller;
+
    public static void main(String[] args) {
       launch();
    }
@@ -20,11 +22,17 @@ public class Launcher extends Application {
       FXMLLoader uiLoader = new FXMLLoader();
       uiLoader.setLocation(getClass().getClassLoader().getResource("mainView.fxml"));
       Scene loginScene = new Scene(uiLoader.load());
-      UIController uiController = uiLoader.getController();
-      uiController.setScene(loginScene);
+      controller = uiLoader.getController();
+      controller.setScene(loginScene);
 
-      uiController.load(stage);
-      stage.setScene(loginScene);
+      controller.load(stage);
       stage.show();
+      stage.setMaximized(true);
+   }
+
+   @Override
+   public void stop() throws Exception {
+      super.stop();
+      controller.close();
    }
 }
