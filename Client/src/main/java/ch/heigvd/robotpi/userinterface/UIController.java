@@ -6,7 +6,6 @@
 package ch.heigvd.robotpi.userinterface;
 
 import ch.heigvd.robotpi.communication.Client;
-import ch.heigvd.robotpi.communication.CommException;
 import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -141,7 +140,7 @@ public class UIController {
                }
             } catch (IOException e) {
                e.printStackTrace();
-            } catch (CommException e) {
+            } catch (Client.RobotException e) {
                e.printStackTrace();
             }
          }
