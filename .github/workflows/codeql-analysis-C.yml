@@ -65,7 +65,7 @@ jobs:
        cd RPi-Cpp-Toolchain/toolchain
        ./toolchain.sh rpi3-armv8-dev --pull --export
        cp x-tools /opt -r
-       cd ../Server
+       cd ../../Server
        make
 
     - name: Perform CodeQL Analysis
