@@ -12,11 +12,8 @@
 name: "CodeQL java"
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ master ]
+  # Allow manual run from Actions menu
+  workflow_dispatch:
   schedule:
     - cron: '00 02 * * 0'
 
