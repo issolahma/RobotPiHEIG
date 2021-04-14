@@ -47,6 +47,8 @@ public class Client {
         if (!in.readLine().equals("PING")) {
             throw new RobotException();
         }
+        // TODO mettre timer
+        // thread pour ping
     }
 
     //lancer des exception dans le cas ou serveur ne reagit pas comme prevu
@@ -56,6 +58,7 @@ public class Client {
         if (!in.readLine().equals("FWD_OK")) {
             throw new RobotException();
         }
+        isMoving = true;
     }
 
     public void goBackward() throws IOException, RobotException {
@@ -81,7 +84,7 @@ public class Client {
 
     public void stop() throws IOException, RobotException {
         out.println("STOP");
-        if (!in.readLine().equals("STOP")) {
+        if (!in.readLine().equals("STOP_OK")) {
             throw new RobotException();
         }
     }
@@ -117,5 +120,7 @@ public class Client {
     public class RobotException extends Exception {
         // par ex si robot envoi mauvaise reponse, pb cote robot en general
     }
+
+    private boolean isMoving;
 
 }
