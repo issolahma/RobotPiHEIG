@@ -12,12 +12,8 @@
 name: "CodeQL C"
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ master ]
   schedule:
+      # Every day - 2am
     - cron: '00 02 * * 0'
 
 jobs:
