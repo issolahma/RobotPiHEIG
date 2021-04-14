@@ -15,7 +15,7 @@ on:
   # Allow manual run from Actions menu
   workflow_dispatch:
   schedule:
-    - cron: '00 02 * * 0'
+    - cron: '00 02 * * *'
 
 jobs:
   analyze:
