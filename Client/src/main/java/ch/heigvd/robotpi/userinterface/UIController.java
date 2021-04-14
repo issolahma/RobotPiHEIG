@@ -44,6 +44,7 @@ public class UIController {
     */
    public void setScene(Scene scene) {
       this.scene = scene;
+
       scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
          switch (keyEvent.getCode()) {
             case LEFT:
