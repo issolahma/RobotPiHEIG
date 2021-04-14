@@ -10,8 +10,13 @@ import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -90,6 +95,97 @@ public class UIController {
       });
       scene.getRoot().requestFocus();
 
+      //Setup buttons pressed
+      BBackwards.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = true;
+         }
+      });
+      BBackwardsLeft.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = true;
+            leftPressed = true;
+         }
+      });
+      BBackwardsRight.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = true;
+            rightPressed = true;
+         }
+      });
+      BFront.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = true;
+         }
+      });
+      BFrontLeft.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = true;
+            leftPressed = true;
+         }
+      });
+      BFrontRight.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = true;
+            rightPressed = true;
+         }
+      });
+      BLeft.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            leftPressed = true;
+         }
+      });
+      BRight.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            rightPressed = true;
+         }
+      });
+
+      //Setup buttons released
+      BBackwards.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = false;
+         }
+      });
+      BBackwardsLeft.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = false;
+            leftPressed = false;
+         }
+      });
+      BBackwardsRight.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = false;
+            rightPressed = false;
+         }
+      });
+      BFront.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = false;
+         }
+      });
+      BFrontLeft.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = false;
+            leftPressed = false;
+         }
+      });
+      BFrontRight.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = false;
+            rightPressed = false;
+         }
+      });
+      BLeft.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            leftPressed = false;
+         }
+      });
+      BRight.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            rightPressed = false;
+         }
+      });
    }
 
    /**
@@ -136,6 +232,10 @@ public class UIController {
                      }
                   } else if (rightPressed) {
                      client.goRight();
+                  } else {//robot ne bouge pas
+                     if (client.isMoving()) { //si le robot n'est pas encore immobilisé
+                        client.stop();
+                     }
                   }
                }
             } catch (IOException e) {
