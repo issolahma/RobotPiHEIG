@@ -62,7 +62,7 @@ jobs:
 
     - run: |
        git clone https://github.com/tttapa/RPi-Cpp-Toolchain.git
-       cd RPi-Cpp-Toolchain
+       cd RPi-Cpp-Toolchain/toolchain
        ./toolchain.sh rpi3-armv8-dev --pull --export
        cp x-tools /opt -r
        cd ../Server
