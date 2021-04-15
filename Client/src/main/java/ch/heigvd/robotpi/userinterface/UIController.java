@@ -14,6 +14,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -45,6 +47,7 @@ public class UIController {
    @FXML private Button BBackwardsLeft;
    @FXML private Button BBackwards;
    @FXML private Button BBackwardsRight;
+   @FXML private Button BCamera;
 
 
    @FXML private Label LConnectionStatus;
@@ -187,6 +190,17 @@ public class UIController {
             rightPressed = false;
          }
       });
+
+      //Setup images Bouttons
+      addImageToButton(BRight, "image/RotateRight.png");
+      addImageToButton(BLeft, "image/RotateLeft.png");
+      addImageToButton(BFrontRight, "image/ForwardTurnRight.png");
+      addImageToButton(BFront, "image/Forward.png");
+      addImageToButton(BFrontLeft, "image/ForwardTurnLeft.png");
+      addImageToButton(BBackwardsRight, "image/BackwardTurnRight.png");
+      addImageToButton(BBackwards, "image/Backward.png");
+      addImageToButton(BBackwardsLeft, "image/BackwardTurnLeft.png");
+      addImageToButton(BCamera, "image/Camera.png");
    }
 
    /**
@@ -257,7 +271,7 @@ public class UIController {
    }
 
    @FXML
-   private void connectButtonPressed(ActionEvent event) {
+   public void connectButtonPressed(ActionEvent event) {
       if (TFConnectionAddress.getText().isEmpty()) {
          Util.createAlertFrame(Alert.AlertType.WARNING, "No ip adress", "No ip adress",
                                "Please write the ip adress of the targeted robot before pressing connect.");
@@ -277,6 +291,16 @@ public class UIController {
                                "The adress you provided is not a valid ip adress. Please try again.");
       }
 
+   }
+
+   private void addImageToButton(Button b, String imageSrc) {
+
+      ImageView i = new ImageView(new Image(getClass().getClassLoader().getResourceAsStream(imageSrc)));
+      i.setFitWidth(90);
+      i.setFitHeight(90);
+      b.setMaxHeight(i.getFitHeight());
+      b.setMaxWidth(i.getFitWidth());
+      b.setGraphic(i);
    }
 
    /**
