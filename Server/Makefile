@@ -28,6 +28,7 @@ TEST_OBJS = $(addprefix $(TEST_OBJ_DIR)/, $(TEST_SRCS:c=o))
 all: $(OUT_DIR)/$(APPNAME) $(TEST_OUT_DIR)/$(TEST_APPNAME)
 
 $(OUT_DIR)/$(APPNAME): $(OBJS)
+	mkdir -p $(@D)
 	$(BUILDTOOLS)-$(CC) $(OBJS) $(LDFLAGS) -o $@
 
 $(OBJ_DIR)/%.o: %.c
@@ -35,6 +36,7 @@ $(OBJ_DIR)/%.o: %.c
 	$(BUILDTOOLS)-$(CC) -o $@ -c $< $(CFLAGS)
 
 $(TEST_OUT_DIR)/$(TEST_APPNAME): $(TEST_OBJS)
+	mkdir -p $(@D)
 	$(BUILDTOOLS)-$(CC) $(TEST_OBJS) $(LDFLAGS) -o $@
 
 $(TEST_OBJ_DIR)/%.o: %.c
