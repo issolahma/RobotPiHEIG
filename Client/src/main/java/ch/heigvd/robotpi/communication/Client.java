@@ -56,6 +56,7 @@ public class Client {
         if (!in.readLine().equals("FWD_OK")) {
             throw new RobotException();
         }
+        isMoving = true;
     }
 
     public void goBackward() throws IOException, RobotException {
@@ -63,6 +64,7 @@ public class Client {
         if (!in.readLine().equals("BKWD_OK")) {
             throw new RobotException();
         }
+        isMoving = true;
     }
 
     public void goLeft() throws IOException, RobotException {
@@ -70,6 +72,7 @@ public class Client {
         if (!in.readLine().equals("ROTATE_LEFT_OK")) {
             throw new RobotException();
         }
+        isMoving = true;
     }
 
     public void goRight() throws IOException, RobotException {
@@ -77,6 +80,7 @@ public class Client {
         if (!in.readLine().equals("ROTATE_RIGHT_OK")) {
             throw new RobotException();
         }
+        isMoving = true;
     }
 
     public void stop() throws IOException, RobotException {
@@ -84,6 +88,7 @@ public class Client {
         if (!in.readLine().equals("STOP")) {
             throw new RobotException();
         }
+        isMoving = false;
     }
 
     //TODO : a voir avec le protocole pour ces méthodes et la classe interne d'erreur
@@ -117,5 +122,11 @@ public class Client {
     public class RobotException extends Exception {
         // par ex si robot envoi mauvaise reponse, pb cote robot en general
     }
+
+    public boolean isMoving() {
+        return isMoving;
+    }
+
+    private boolean isMoving = false;
 
 }
