@@ -8,9 +8,10 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <string.h>
+#include <signal.h>
 
 #define LISTENING_PORT 9734
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 32
 
 int server();
 void *session_task(void *ptr);
