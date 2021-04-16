@@ -2,6 +2,38 @@
 
 The source for the server/robot part of the RoboPiHEIG project.
 
+## Raspberry Pi setup
+
+We use Raspberry Pi OS Lite 32-bit, because we don't need a desktop environment. Download the Raspberry Pi OS Lite version from here :
+
+[https://www.raspberrypi.org/software/operating-systems/#raspberry-pi-os-32-bit](https://www.raspberrypi.org/software/operating-systems/#raspberry-pi-os-32-bit)
+
+Unzip the downloaded file, and then flash the *.img file onto the Raspberry Pi's SD card:
+
+```bash
+$ sudo dd if=2021-03-04-raspios-buster-armhf-lite.img of=/dev/sdX bs=4M status=progress
+```
+
+Where `/dev/sdX` is the block device for your sdcard, usually `/dev/sdc` or `/dev/sdb`. Use the command `lsblk` to identify the correct block device, and do not mount the SD card. **Be sure to double-check that you have the right block device, especially not the one for your hard drive! You could brick your computer.**
+
+To enable the ssh server on the Raspberry Pi, mount your newly flashed SD card and create an empty file named `ssh` at the root of the `boot` partition:
+
+```bash
+$ cd sdcard_boot_mount_dir
+$ touch ssh
+```
+
+Replace `sdcard_boot_mount_dir` with the path to the directory where the `boot` partition of the SD card was mounted by your operating system.
+
+To enable passwordless SSH access, copy your SSH public key to the Raspberry Pi's SD card, in the home directory in the `rootfs` partition:
+
+```bash
+mkdir sdcard_rootfs_mount_dir/home/pi/.ssh
+cat ~/.ssh/id_rsa.pub >> $(rootfs_mount_dir)/home/pi/.ssh/authorized_keys
+```
+
+Replace `sdcard_rootfs_mount_dir` with the path to the directory where the `rootfs` partition of the SD card was mounted by your operating system.
+
 ##  Toolchain setup
 
 We use the toolchain provided by the [RPi-Cpp-Toolchain](https://github.com/tttapa/RPi-Cpp-Toolchain) project. It uses docker to retrieve and generate the appropriate toolchain and sysroot for the Raspberry Pi Robot.

@@ -1,3 +1,7 @@
+# Set to the address of the Raspberry Pi
+PI_ADDR = 192.168.0.66
+
+# Toolchain and sysroot location
 TOOLCHAIN = armv8-rpi3-linux-gnueabihf
 TOOLCHAIN_DIR = /opt/x-tools/$(TOOLCHAIN)
 SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/sysroot/
@@ -6,7 +10,7 @@ BUILDTOOLS = $(TOOLCHAIN_DIR)/bin/$(TOOLCHAIN)
 CC = gcc
 LD = ld
 CFLAGS = -g -Wall
-LDFLAGS = -lc
+LDFLAGS = -lc -pthread
 TARGETFOLDER = bin
 APPNAME = RoboPiServer
 TEST_APPNAME = RoboPiServerTest
@@ -48,6 +52,9 @@ clean:
 	rm -rf $(OBJ_DIR)/*
 	rm -rf $(TEST_OUT_DIR)/*
 	rm -rf $(TEST_OBJ_DIR)/*
+
+deploy: $(OUT_DIR)/$(APPNAME)
+	scp $^ pi@$(PI_ADDR):/home/pi
 
 test: 
 
