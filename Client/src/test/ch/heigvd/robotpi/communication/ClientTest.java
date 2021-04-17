@@ -1,33 +1,90 @@
 package ch.heigvd.robotpi.communication;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClientTest {
+    Client cli = new Client();
+    Thread srvThread;
+
+    @BeforeAll
+    static void beforeAll() {
+        Thread srvThread = new Thread(new Server(2025, "good"));
+        srvThread.start();
+    }
 
     @BeforeEach
     void setUp() {
+
+    }
+
+    @AfterEach
+    void teardown(){
+
     }
 
     @Test
-    void connect() {
+    void returnFalseWhenNotConnecting() {
+        boolean result = cli.connect("aaa.333.333.333");
+        boolean expected = false;
+        assertEquals(expected, result);
     }
 
     @Test
-    void isConnected() {
+    void returnTrueWhenConnecting() {
+        boolean result = cli.connect("127.0.0.1");
+        cli.disconnect();
+        boolean expected = true;
+        assertEquals(expected, result);
+    }
+
+
+    @Test
+    void isConnectedReturnTrueWhenConnected() {
+        cli.connect("127.0.0.1");
+        boolean result = cli.isConnected();
+        boolean expected = true;
+        assertEquals(expected, result);
     }
 
     @Test
-    void disconnect() {
+    void isConnectedReturnFalseWhenNotConnected() {
+        cli.connect("aaa.333.333.333");
+        boolean result = cli.isConnected();
+        boolean expected = false;
+        assertEquals(expected, result);
     }
 
     @Test
-    void ping() {
+    void disconnectWorks() {
+        boolean result = false;
+        boolean expected = true;
+
+        cli.connect("127.0.0.1");
+        if (cli.isConnected()){
+            cli.disconnect();
+            if (!cli.isConnected())
+                result = true;
+        }
+
+        assertEquals(expected, result);
     }
 
     @Test
-    void goForward() {
+    void pingCmdIsReceived() {
+        cli.connect("127.0.0.1");
+        try {
+            cli.ping();
+        } catch (Client.RobotException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // TODO ...
     }
+
 }
