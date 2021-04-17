@@ -14,39 +14,39 @@ public class Client {
     private boolean isConnected;
     public final int PORT = 2025;
 
-    public boolean connect(String ip) {
-        try {
+    public void connect(String ip) throws CantConnectException, IOException, IncorrectDeviceException {
             clientSocket = new Socket(ip, PORT);
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             isConnected = true;
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
+            if (in.readLine().equals("CONN_ERR")) {
+                throw new CantConnectException();
+            } else {
+                throw new IncorrectDeviceException();
+            }
     }
 
     public boolean isConnected() {
         return isConnected;
     }
 
-    public void disconnect() {
-        try {
+    public void disconnect() throws CantConnectException, IOException {
             in.close();
             out.close();
             clientSocket.close();
-            isConnected = false;
-        } catch (IOException e) {
-
-        }
+            if (!in.readLine().equals("DISCONN_OK")) {
+                throw new CantConnectException();
+            } else {
+                isConnected = false;
+            }
     }
 
     //TODO catch les ioException et throw les bonnes exc
 
-    public void ping() throws IOException, RobotException {
+    public void ping() throws IOException, LostConnectionException {
         out.println("PING");
         if (!in.readLine().equals("PING")) {
-            throw new RobotException();
+            throw new LostConnectionException();
         }
     }
 
@@ -93,34 +93,54 @@ public class Client {
     }
 
     //TODO : a voir avec le protocole pour ces méthodes et la classe interne d'erreur
-    public void goFrontLeft() {
+    public void goFrontLeft() throws IOException, RobotException {
+        out.println("FRONT_L");
+        if (!in.readLine().equals("FRONT_L_OK")) {
+            throw new RobotException();
+        }
+        isMoving = true;
     }
 
-    public void goFrontRight() {
+    public void goFrontRight() throws RobotException, IOException {
+        out.println("RIGHT_R");
+        if (!in.readLine().equals("RIGHT_R_OK")) {
+            throw new RobotException();
+        }
+        isMoving = true;
     }
 
-    public void goBackwardsRight() {
+    public void goBackwardsRight() throws IOException, RobotException {
+        out.println("BCK_R");
+        if (!in.readLine().equals("BCK_R_OK")) {
+            throw new RobotException();
+        }
+        isMoving = true;
     }
 
-    public void goBackwardsLeft() {
+    public void goBackwardsLeft() throws IOException, RobotException {
+        out.println("BCK_L");
+        if (!in.readLine().equals("BCK_L_OK")) {
+            throw new RobotException();
+        }
+        isMoving = true;
     }
 
     public class CommException extends Exception {
     }
 
-    public class CantConnectException extends Exception {
+    public class CantConnectException extends CommException {
         // pb connexion en general
     }
 
-    public class IncorrectDeviceException extends Exception {
-        // qqn avec IP mais Robot pi
+    public class IncorrectDeviceException extends CommException {
+        // qqn avec IP mais pas Robot pi
     }
 
-    public class LostConnectionException extends Exception {
+    public class LostConnectionException extends CommException {
         //pb ping connexion
     }
 
-    public class RobotException extends Exception {
+    public class RobotException extends CommException {
         // par ex si robot envoi mauvaise reponse, pb cote robot en general
     }
 
