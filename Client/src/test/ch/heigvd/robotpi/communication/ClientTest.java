@@ -34,7 +34,7 @@ class ClientTest {
 
     @Test
     void returnTrueWhenConnecting() {
-        boolean result = cli.connect("127.0.0.1");
+        boolean result = cli.connect("localhost");
         cli.disconnect();
         boolean expected = true;
         assertEquals(expected, result);
