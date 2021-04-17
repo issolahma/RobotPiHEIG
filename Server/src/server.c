@@ -7,8 +7,12 @@ int server_sockfd = 0, client_sockfd = 0;
 
 static void close_socks_on_sigint(int signo) {
     fprintf(stdout, "Received SIGINT signal\n");
-    close(server_sockfd);
-    close(client_sockfd);
+    if (close(server_sockfd) < 0) {
+        fprintf(stderr, "Error closing server socket\n");
+    }
+    if (close(client_sockfd) < 0) {
+        fprintf(stderr, "Error closing client socket\n");
+    }
     signal(SIGINT, SIG_DFL);
     raise(SIGINT);
 }
