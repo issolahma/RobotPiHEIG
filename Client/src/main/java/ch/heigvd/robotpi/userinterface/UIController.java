@@ -311,8 +311,13 @@ public class UIController {
 
    }
 
+   /**
+    * Adds an image to the given button, and sets up the button so it can conveniently show the image
+    *
+    * @param b        the button to setup
+    * @param imageSrc the path to the image
+    */
    private void addImageToButton(Button b, String imageSrc) {
-
       ImageView i = new ImageView(new Image(getClass().getClassLoader().getResourceAsStream(imageSrc)));
       i.setFitWidth(90);
       i.setFitHeight(90);
