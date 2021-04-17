@@ -15,32 +15,34 @@ public class Client {
     public final int PORT = 2025;
 
     public void connect(String ip) throws CantConnectException, IOException, IncorrectDeviceException {
-            clientSocket = new Socket(ip, PORT);
-            out = new PrintWriter(clientSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            isConnected = true;
-            if (in.readLine().equals("CONN_ERR")) {
-                throw new CantConnectException();
-            } else if (!in.readLine().equals("CONN_OK")) {
-                throw new IncorrectDeviceException();
-            }
+        clientSocket = new Socket(ip, PORT);
+        out = new PrintWriter(clientSocket.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        isConnected = true;
+        if (in.readLine().equals("CONN_ERR")) {
+            throw new CantConnectException();
+        } else if (!in.readLine().equals("CONN_OK")) {
+            throw new IncorrectDeviceException();
+        }
     }
 
     public boolean isConnected() {
         return isConnected;
     }
 
-    public void disconnect() throws CantConnectException, IOException, IncorrectDeviceException {
+    public void disconnect() throws IOException {
+        int count = 1;
+        String message;
+        do {
             in.close();
             out.close();
             clientSocket.close();
-            if (in.readLine().equals("DISCONN_ERR")) {
-                throw new CantConnectException();
-            } else if (!in.readLine().equals("DISCONN_OK")) {
-                throw new IncorrectDeviceException();
-            } else {
-                isConnected = false;
-            }
+            message = in.readLine();
+        } while (!message.equals("DISCONN_OK") && count++ != 5);
+
+        if (message.equals("DISCONN_OK")) {
+            isConnected = false;
+        }
     }
 
     //TODO catch les ioException et throw les bonnes exc
