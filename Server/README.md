@@ -28,8 +28,8 @@ Replace `sdcard_boot_mount_dir` with the path to the directory where the `boot` 
 To enable passwordless SSH access, copy your SSH public key to the Raspberry Pi's SD card, in the home directory in the `rootfs` partition:
 
 ```bash
-mkdir sdcard_rootfs_mount_dir/home/pi/.ssh
-cat ~/.ssh/id_rsa.pub >> $(rootfs_mount_dir)/home/pi/.ssh/authorized_keys
+$ mkdir sdcard_rootfs_mount_dir/home/pi/.ssh
+$ cat ~/.ssh/id_rsa.pub >> rootfs_mount_dir/home/pi/.ssh/authorized_keys
 ```
 
 Replace `sdcard_rootfs_mount_dir` with the path to the directory where the `rootfs` partition of the SD card was mounted by your operating system.
@@ -43,7 +43,7 @@ To do cross compilation, we need a *toolchain* and a *sysroot*. The toolchain co
 1. Clone the RPi-Cpp-Toolchain :
 
 ```sh
-git clone git@github.com:tttapa/RPi-Cpp-Toolchain.git
+$ git clone git@github.com:tttapa/RPi-Cpp-Toolchain.git
 ```
 
 2. In the `toolchain` directory, run `./toolchain.sh rpi3-armv8-dev --pull --export`. The `rpi3-armv8-dev` is suitable for the Raspberry Pi 3 with a 32-bit raspbian OS. When the script is done, the `x-tools` directory contains the toolchain. You will need docker for this step.
@@ -51,5 +51,5 @@ git clone git@github.com:tttapa/RPi-Cpp-Toolchain.git
 3. Install the toolchain into your `/opt` directory :
 
 ```sh
-cp x-tools /opt -r
+$ cp x-tools /opt -r
 ```
