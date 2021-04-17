@@ -35,6 +35,7 @@ public class Client {
             in.close();
             out.close();
             clientSocket.close();
+            isConnected = false;
         } catch (IOException e) {
 
         }
