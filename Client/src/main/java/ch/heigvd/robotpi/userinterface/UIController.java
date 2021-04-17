@@ -6,6 +6,7 @@
 package ch.heigvd.robotpi.userinterface;
 
 import ch.heigvd.robotpi.communication.Client;
+import ch.heigvd.robotpi.userinterface.settings.SettingsParams;
 import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -76,11 +77,11 @@ public class UIController {
          this.close();
       }
 
-      currentIpAddress = settings.getProperty("ipAddress");
+      currentIpAddress = settings.getProperty(SettingsParams.IP_ADDRESS.getParamName());
       System.out.println(currentIpAddress);
 
       //Process settings
-      if (!currentIpAddress.equals("")){
+      if (!currentIpAddress.equals("")) {
          TFConnectionAddress.setText(currentIpAddress);
       }
 
@@ -304,7 +305,7 @@ public class UIController {
             e.printStackTrace();
          }
       }
-      settings.setProperty("ipAddress", currentIpAddress);
+      settings.setProperty(SettingsParams.IP_ADDRESS.getParamName(), currentIpAddress);
    }
 
    @FXML
