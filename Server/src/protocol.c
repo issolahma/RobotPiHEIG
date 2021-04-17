@@ -23,6 +23,18 @@ void put_response(char *response, int response_code) {
         case ROTATE_RIGHT_OK:
             strcpy(response, "ROTATE_RIGHT_OK");
             break;
+        case FRONT_L_OK:
+            strcpy(response, "FRONT_L_OK");
+            break;
+        case FRONT_R_OK:
+            strcpy(response, "FRONT_R_OK");
+            break;
+        case BCK_L_OK:
+            strcpy(response, "BCK_L_OK");
+            break;
+        case BCK_R_OK:
+            strcpy(response, "BCK_R_OK");
+            break;
         case DISCONN_OK:
             strcpy(response, "DISCONN_OK");
             break;
@@ -52,10 +64,20 @@ int process_cmd(char *cmd, char *response) {
         response_code = ROTATE_LEFT_OK;
     } else if (!strcmp(cmd, "ROTATE_RIGHT")) {
         response_code = ROTATE_RIGHT_OK;
+    } else if (!strcmp(cmd, "FRONT_L")) {
+        response_code = FRONT_L_OK;
+    } else if (!strcmp(cmd, "FRONT_R")) {
+        response_code = FRONT_R_OK;
+    } else if (!strcmp(cmd, "BCK_L")) {
+        response_code = BCK_L_OK;
+    } else if (!strcmp(cmd, "BCK_R")) {
+        response_code = BCK_R_OK;
     } else if (!strcmp(cmd, "DISCONN")) {
         response_code = DISCONN_OK;
     } else if (!strcmp(cmd, "PING")) {
         response_code = PING;
+    } else {
+        fprintf(stdout, "Commande non reconnue : %s\n", cmd);
     }
     put_response(response, response_code);
     return 0;
