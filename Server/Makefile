@@ -16,6 +16,7 @@ APPNAME = RoboPiServer
 TEST_APPNAME = RoboPiServerTest
 
 SUBDIR = src
+INCLUDE_DIR = $(SUBDIR)/include
 TEST_SUBDIR = test
 OUT_DIR = ./bin
 TEST_OUT_DIR = ./test_bin
@@ -26,6 +27,7 @@ SRCS = $(wildcard *.c $(foreach dir, $(SUBDIR), $(dir)/*.c))
 TEST_SRCS = $(wildcard *.c $(foreach dir, $(TEST_SUBDIR), $(dir)/*.c))
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:c=o))
 TEST_OBJS = $(addprefix $(TEST_OBJ_DIR)/, $(TEST_SRCS:c=o))
+DEPS = $(wildcard *.h $(foreach dir, $(INCLUDE_DIR), $(dir)/*.h))
 
 .PHONY: clean
 
@@ -35,7 +37,7 @@ $(OUT_DIR)/$(APPNAME): $(OBJS)
 	mkdir -p $(@D)
 	$(BUILDTOOLS)-$(CC) $(OBJS) $(LDFLAGS) -o $@
 
-$(OBJ_DIR)/%.o: %.c
+$(OBJ_DIR)/%.o: %.c $(DEPS)
 	mkdir -p $(@D)
 	$(BUILDTOOLS)-$(CC) -o $@ -c $< $(CFLAGS)
 
