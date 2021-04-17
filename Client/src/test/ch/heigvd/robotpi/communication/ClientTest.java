@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClientTest {
     Client cli = new Client();
-    Thread srvThread;
 
     @BeforeAll
     static void beforeAll() {
@@ -46,6 +45,7 @@ class ClientTest {
     void isConnectedReturnTrueWhenConnected() {
         cli.connect("127.0.0.1");
         boolean result = cli.isConnected();
+        cli.disconnect();
         boolean expected = true;
         assertEquals(expected, result);
     }
