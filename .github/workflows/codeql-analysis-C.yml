@@ -12,9 +12,11 @@
 name: "CodeQL C"
 
 on:
+  # Allow manual run from Actions menu
+  workflow_dispatch:
   schedule:
       # Every day - 2am
-    - cron: '00 02 * * 0'
+    - cron: '00 02 * * *'
 
 jobs:
   analyze:

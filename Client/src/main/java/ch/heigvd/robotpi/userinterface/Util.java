@@ -24,8 +24,6 @@ public final class Util {
       alert.setTitle(title);
       alert.setHeaderText(header);
       alert.setContentText(content);
-      ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("images/mainImage.jpg"));
-
       alert.showAndWait();
    }
 }
