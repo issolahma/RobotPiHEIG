@@ -22,14 +22,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Properties;
 
 /**
  * The controller of the main window of the client's app
  */
 public class UIController {
+   //Settings
+   Properties settings;
    private Scene scene;
    private Client client;
    private ConnectedWorker worker;
+   private String currentIpAddress;
 
    /**
     * Boolean to know when a key is pressed
@@ -60,6 +64,25 @@ public class UIController {
     */
    public void setScene(Scene scene) {
       this.scene = scene;
+      //Load settings
+      settings = new Properties();
+      try {
+         settings.load(getClass().getClassLoader().getResourceAsStream("settings.properties"));
+      } catch (IOException e) {
+         e.printStackTrace();
+         Util.createAlertFrame(Alert.AlertType.ERROR, "Error while loading the properties",
+                               "Error while loading the properties",
+                               "There was an error while loading the properties, the app will close.");
+         this.close();
+      }
+
+      currentIpAddress = settings.getProperty("ipAddress");
+      System.out.println(currentIpAddress);
+
+      //Process settings
+      if (!currentIpAddress.equals("")){
+         TFConnectionAddress.setText(currentIpAddress);
+      }
 
       //Setup keys
       scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
@@ -271,14 +294,17 @@ public class UIController {
     * Closes the ui
     */
    public void close() {
-      worker.signalShutdown();
-      if (client.isConnected()) {
+      if (worker != null) {
+         worker.signalShutdown();
+      }
+      if (client != null && client.isConnected()) {
          try {
             client.disconnect();
          } catch (IOException e) {
             e.printStackTrace();
          }
       }
+      settings.setProperty("ipAddress", currentIpAddress);
    }
 
    @FXML
@@ -293,6 +319,7 @@ public class UIController {
          try {
             client.connect(ipAdress);
             worker.setConnected();
+            currentIpAddress = ipAdress;
          } catch (Client.CantConnectException e) {
             e.printStackTrace();
             Util.createAlertFrame(Alert.AlertType.ERROR, "Error with the robot", "Error with the robot",
