@@ -10,7 +10,7 @@
 #include <string.h>
 #include <signal.h>
 
-#define LISTENING_PORT 9734
+#define LISTENING_PORT 2025
 #define BUFFER_SIZE 32
 
 int server();
