@@ -30,12 +30,14 @@ public class Client {
         return isConnected;
     }
 
-    public void disconnect() throws CantConnectException, IOException {
+    public void disconnect() throws CantConnectException, IOException, IncorrectDeviceException {
             in.close();
             out.close();
             clientSocket.close();
-            if (!in.readLine().equals("DISCONN_OK")) {
+            if (in.readLine().equals("DISCONN_ERR")) {
                 throw new CantConnectException();
+            } else if (!in.readLine().equals("DISCONN_OK")) {
+                throw new IncorrectDeviceException();
             } else {
                 isConnected = false;
             }
