@@ -34,7 +34,7 @@ public class UIController {
    /**
     * Boolean to know when a key is pressed
     */
-   private Boolean upPressed = false;
+   private boolean upPressed = false;
    private boolean rightPressed = false;
    private boolean leftPressed = false;
    private boolean downPressed = false;
@@ -54,13 +54,14 @@ public class UIController {
    @FXML private TextField TFConnectionAddress;
 
    /**
-    * Sets the scene linked to this controller
+    * Sets the scene linked to this controller and sets up all of it's components
     *
     * @param scene the scene
     */
    public void setScene(Scene scene) {
       this.scene = scene;
 
+      //Setup keys
       scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
          switch (keyEvent.getCode()) {
             case LEFT:
@@ -257,6 +258,9 @@ public class UIController {
                e.printStackTrace();
             } catch (Client.RobotException e) {
                e.printStackTrace();
+               Util.createAlertFrame(Alert.AlertType.ERROR, "Error while trying to move", "Error while trying to move",
+                                     "The robot seems to have had an error while moving. Please check the robot and " +
+                                     "make sure he is not blocked.");
             }
          }
       };
@@ -268,6 +272,13 @@ public class UIController {
     */
    public void close() {
       worker.signalShutdown();
+      if (client.isConnected()) {
+         try {
+            client.disconnect();
+         } catch (IOException e) {
+            e.printStackTrace();
+         }
+      }
    }
 
    @FXML
@@ -279,12 +290,19 @@ public class UIController {
       String ipAdress = TFConnectionAddress.getText();
       if (ipAdress.matches("(?<!\\d|\\d\\.)(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
                            "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])(?!\\d|\\.\\d)")) {
-         if (!client.connect(ipAdress)) {
+         try {
+            client.connect(ipAdress);
+            worker.setConnected();
+         } catch (Client.CantConnectException e) {
+            e.printStackTrace();
+            Util.createAlertFrame(Alert.AlertType.ERROR, "Error with the robot", "Error with the robot",
+                                  "The robot had an issue while connecting to the client. Please restart the robot " +
+                                  "then try again");
+         } catch (IOException | Client.IncorrectDeviceException e) {
+            e.printStackTrace();
             Util.createAlertFrame(Alert.AlertType.ERROR, "Wrong ip adress", "Wrong ip adress",
                                   "The ip adress you wrote does not coincide with that of a robot. Please check the " +
                                   "ip adress of the robot and try again.");
-         } else {
-            worker.setConnected();
          }
       } else {
          Util.createAlertFrame(Alert.AlertType.ERROR, "Not an ip adress", "Not an ip adress",
@@ -293,8 +311,13 @@ public class UIController {
 
    }
 
+   /**
+    * Adds an image to the given button, and sets up the button so it can conveniently show the image
+    *
+    * @param b        the button to setup
+    * @param imageSrc the path to the image
+    */
    private void addImageToButton(Button b, String imageSrc) {
-
       ImageView i = new ImageView(new Image(getClass().getClassLoader().getResourceAsStream(imageSrc)));
       i.setFitWidth(90);
       i.setFitHeight(90);
