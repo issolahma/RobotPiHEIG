@@ -21,7 +21,7 @@ public class Client {
             isConnected = true;
             if (in.readLine().equals("CONN_ERR")) {
                 throw new CantConnectException();
-            } else {
+            } else if (!in.readLine().equals("CONN_OK")) {
                 throw new IncorrectDeviceException();
             }
     }
