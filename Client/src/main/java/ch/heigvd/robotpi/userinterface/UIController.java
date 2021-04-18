@@ -87,147 +87,8 @@ public class UIController {
          TFConnectionAddress.setText(currentIpAddress);
       }
 
-      //Setup keys
-      scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
-         switch (keyEvent.getCode()) {
-            case LEFT:
-               leftPressed = true;
-               break;
-            case RIGHT:
-               rightPressed = true;
-               break;
-            case DOWN:
-               downPressed = true;
-               break;
-            case UP:
-               upPressed = true;
-               break;
-            default:
-               break;
-         }
-      });
-      scene.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
-         switch (keyEvent.getCode()) {
-            case LEFT:
-               leftPressed = false;
-               break;
-            case RIGHT:
-               rightPressed = false;
-               break;
-            case DOWN:
-               downPressed = false;
-               break;
-            case UP:
-               upPressed = false;
-               break;
-            default:
-               break;
-         }
-      });
-      scene.getRoot().requestFocus();
-
-      //Setup buttons pressed
-      BBackwards.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            downPressed = true;
-         }
-      });
-      BBackwardsLeft.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            downPressed = true;
-            leftPressed = true;
-         }
-      });
-      BBackwardsRight.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            downPressed = true;
-            rightPressed = true;
-         }
-      });
-      BFront.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            upPressed = true;
-         }
-      });
-      BFrontLeft.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            upPressed = true;
-            leftPressed = true;
-         }
-      });
-      BFrontRight.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            upPressed = true;
-            rightPressed = true;
-         }
-      });
-      BLeft.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            leftPressed = true;
-         }
-      });
-      BRight.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            rightPressed = true;
-         }
-      });
-
-      //Setup buttons released
-      BBackwards.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            downPressed = false;
-         }
-      });
-      BBackwardsLeft.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            downPressed = false;
-            leftPressed = false;
-         }
-      });
-      BBackwardsRight.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            downPressed = false;
-            rightPressed = false;
-         }
-      });
-      BFront.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            upPressed = false;
-         }
-      });
-      BFrontLeft.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            upPressed = false;
-            leftPressed = false;
-         }
-      });
-      BFrontRight.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            upPressed = false;
-            rightPressed = false;
-         }
-      });
-      BLeft.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            leftPressed = false;
-         }
-      });
-      BRight.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
-         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-            rightPressed = false;
-         }
-      });
-
-      //Setup images Bouttons
-      addImageToButton(BRight, "image/RotateRight.png");
-      addImageToButton(BLeft, "image/RotateLeft.png");
-      addImageToButton(BFrontRight, "image/ForwardTurnRight.png");
-      addImageToButton(BFront, "image/Forward.png");
-      addImageToButton(BFrontLeft, "image/ForwardTurnLeft.png");
-      addImageToButton(BBackwardsRight, "image/BackwardTurnRight.png");
-      addImageToButton(BBackwards, "image/Backward.png");
-      addImageToButton(BBackwardsLeft, "image/BackwardTurnLeft.png");
-      addImageToButton(BCamera, "image/Camera.png");
+      setupKeys();
+      setupButtons();
    }
 
    /**
@@ -372,6 +233,150 @@ public class UIController {
                                "The adress you provided is not a valid ip adress. Please try again.");
       }
 
+   }
+
+   private void setupButtons() {
+      BBackwards.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = true;
+         }
+      });
+      BBackwardsLeft.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = true;
+            leftPressed = true;
+         }
+      });
+      BBackwardsRight.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = true;
+            rightPressed = true;
+         }
+      });
+      BFront.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = true;
+         }
+      });
+      BFrontLeft.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = true;
+            leftPressed = true;
+         }
+      });
+      BFrontRight.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = true;
+            rightPressed = true;
+         }
+      });
+      BLeft.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            leftPressed = true;
+         }
+      });
+      BRight.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            rightPressed = true;
+         }
+      });
+
+      //Setup buttons released
+      BBackwards.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = false;
+         }
+      });
+      BBackwardsLeft.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = false;
+            leftPressed = false;
+         }
+      });
+      BBackwardsRight.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            downPressed = false;
+            rightPressed = false;
+         }
+      });
+      BFront.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = false;
+         }
+      });
+      BFrontLeft.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = false;
+            leftPressed = false;
+         }
+      });
+      BFrontRight.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            upPressed = false;
+            rightPressed = false;
+         }
+      });
+      BLeft.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            leftPressed = false;
+         }
+      });
+      BRight.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+         if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+            rightPressed = false;
+         }
+      });
+
+      //Setup images Bouttons
+      addImageToButton(BRight, "image/RotateRight.png");
+      addImageToButton(BLeft, "image/RotateLeft.png");
+      addImageToButton(BFrontRight, "image/ForwardTurnRight.png");
+      addImageToButton(BFront, "image/Forward.png");
+      addImageToButton(BFrontLeft, "image/ForwardTurnLeft.png");
+      addImageToButton(BBackwardsRight, "image/BackwardTurnRight.png");
+      addImageToButton(BBackwards, "image/Backward.png");
+      addImageToButton(BBackwardsLeft, "image/BackwardTurnLeft.png");
+      addImageToButton(BCamera, "image/Camera.png");
+   }
+
+   private void setupKeys() {
+      scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+         switch (keyEvent.getCode()) {
+            case LEFT:
+               leftPressed = true;
+               break;
+            case RIGHT:
+               rightPressed = true;
+               break;
+            case DOWN:
+               downPressed = true;
+               break;
+            case UP:
+               upPressed = true;
+               break;
+            default:
+               break;
+         }
+      });
+      scene.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
+         switch (keyEvent.getCode()) {
+            case LEFT:
+               leftPressed = false;
+               break;
+            case RIGHT:
+               rightPressed = false;
+               break;
+            case DOWN:
+               downPressed = false;
+               break;
+            case UP:
+               upPressed = false;
+               break;
+            default:
+               break;
+         }
+      });
+      scene.getRoot().requestFocus();
    }
 
    /**
