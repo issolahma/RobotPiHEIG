@@ -6,6 +6,7 @@
 package ch.heigvd.robotpi.userinterface;
 
 import ch.heigvd.robotpi.communication.Client;
+import ch.heigvd.robotpi.userinterface.settings.SettingsParams;
 import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,14 +23,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Properties;
 
 /**
  * The controller of the main window of the client's app
  */
 public class UIController {
+   //Settings
+   Properties settings;
    private Scene scene;
    private Client client;
    private ConnectedWorker worker;
+   private String currentIpAddress;
    private Thread workerThread;
 
    /**
@@ -61,6 +66,25 @@ public class UIController {
     */
    public void setScene(Scene scene) {
       this.scene = scene;
+      //Load settings
+      settings = new Properties();
+      try {
+         settings.load(getClass().getClassLoader().getResourceAsStream("settings.properties"));
+      } catch (IOException e) {
+         e.printStackTrace();
+         Util.createAlertFrame(Alert.AlertType.ERROR, "Error while loading the properties",
+                               "Error while loading the properties",
+                               "There was an error while loading the properties, the app will close.");
+         this.close();
+      }
+
+      currentIpAddress = settings.getProperty(SettingsParams.IP_ADDRESS.getParamName());
+      System.out.println(currentIpAddress);
+
+      //Process settings
+      if (!currentIpAddress.equals("")) {
+         TFConnectionAddress.setText(currentIpAddress);
+      }
 
       //Setup keys
       scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
@@ -274,16 +298,19 @@ public class UIController {
     * Closes the ui
     */
    public void close() {
-      worker.signalShutdown();
-      try {
-         synchronized (worker){
-            worker.notify();
-         }
-         workerThread.join();
-      } catch (InterruptedException e) {
-         e.printStackTrace();
+      settings.setProperty(SettingsParams.IP_ADDRESS.getParamName(), currentIpAddress);
+      if (worker != null) {
+        worker.signalShutdown();
+        try {
+           synchronized (worker){
+             worker.notify();
+          }
+          workerThread.join();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
-      if (client.isConnected()) {
+      if (client != null && client.isConnected()) {
          try {
             client.disconnect();
          } catch (IOException e) {
@@ -305,6 +332,7 @@ public class UIController {
          try {
             client.connect(ipAdress);
             worker.setConnected();
+            currentIpAddress = ipAdress;
             synchronized (worker) {
                worker.notify();
             }
