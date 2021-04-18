@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 
-public class ClientTestBadServer {
+class ClientBadServerTest {
     Client cli = new Client();
 
     @BeforeAll
     static void beforeAll() {
-        Thread srvThread = new Thread(new Server(2025, "bad"));
+        Thread srvThread = new Thread(new ClientGoodServerTest.Server(2025, "bad"));
         srvThread.start();
     }
 
