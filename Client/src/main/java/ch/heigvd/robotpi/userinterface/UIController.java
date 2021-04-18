@@ -35,6 +35,7 @@ public class UIController {
    private Client client;
    private ConnectedWorker worker;
    private String currentIpAddress;
+   private Thread workerThread;
 
    /**
     * Boolean to know when a key is pressed
@@ -236,6 +237,8 @@ public class UIController {
    public void load(Stage primaryStage) {
       client = new Client();
       worker = new ConnectedWorker();
+      workerThread = new Thread(worker);
+      workerThread.start();
       primaryStage.setScene(scene);
       primaryStage.showingProperty().addListener(((observableValue, oldValue, showing) -> {
          if (showing) {
@@ -295,8 +298,17 @@ public class UIController {
     * Closes the ui
     */
    public void close() {
+      settings.setProperty(SettingsParams.IP_ADDRESS.getParamName(), currentIpAddress);
       if (worker != null) {
-         worker.signalShutdown();
+        worker.signalShutdown();
+        try {
+           synchronized (worker){
+             worker.notify();
+          }
+          workerThread.join();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
       if (client != null && client.isConnected()) {
          try {
@@ -305,7 +317,6 @@ public class UIController {
             e.printStackTrace();
          }
       }
-      settings.setProperty(SettingsParams.IP_ADDRESS.getParamName(), currentIpAddress);
    }
 
    @FXML
@@ -315,12 +326,16 @@ public class UIController {
                                "Please write the ip adress of the targeted robot before pressing connect.");
       }
       String ipAdress = TFConnectionAddress.getText();
-      if (ipAdress.matches("(?<!\\d|\\d\\.)(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                           "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])(?!\\d|\\.\\d)")) {
+      //if (ipAdress.matches("(?<!\\d|\\d\\.)(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])
+      // \\." +
+                          // "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])(?!\\d|\\.\\d)")) {
          try {
             client.connect(ipAdress);
             worker.setConnected();
             currentIpAddress = ipAdress;
+            synchronized (worker) {
+               worker.notify();
+            }
          } catch (Client.CantConnectException e) {
             e.printStackTrace();
             Util.createAlertFrame(Alert.AlertType.ERROR, "Error with the robot", "Error with the robot",
@@ -332,10 +347,10 @@ public class UIController {
                                   "The ip adress you wrote does not coincide with that of a robot. Please check the " +
                                   "ip adress of the robot and try again.");
          }
-      } else {
+      /*} else {
          Util.createAlertFrame(Alert.AlertType.ERROR, "Not an ip adress", "Not an ip adress",
                                "The adress you provided is not a valid ip adress. Please try again.");
-      }
+      }*/
 
    }
 
@@ -366,6 +381,7 @@ public class UIController {
        */
       public void signalShutdown() {
          this.running = false;
+         connected = false;
       }
 
       /**
@@ -383,33 +399,36 @@ public class UIController {
        */
       public void setConnected() {
          this.connected = true;
-         this.notify();
+         LConnectionStatus.setText("Connected");
       }
 
       @Override
       public void run() {
          while (running) {
             if (!connected) {
-               try {
-                  this.wait();
-               } catch (InterruptedException e) {
-                  e.printStackTrace();
+               synchronized (this){
+                  try {
+                     wait();
+                  } catch (InterruptedException e) {
+                     e.printStackTrace();
+                  }
                }
             }
-            LConnectionStatus.setText("Connected");
             while (connected) {
                if (!client.isConnected()) {
                   connected = false;
                   LConnectionStatus.setText("Disconnected");
                }
                try {
-                  Thread.sleep(20000);
+                  System.out.println("Sleeping");
+                  Thread.sleep(10000);
+
                } catch (InterruptedException e) {
                   e.printStackTrace();
                }
             }
          }
-
+         System.out.println("Exiting");
       }
    }
 }

@@ -19,9 +19,13 @@ public class Client {
         out = new PrintWriter(clientSocket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         isConnected = true;
-        if (in.readLine().equals("CONN_ERR")) {
+        out.println("CONN");
+        String message = in.readLine();
+        if (message.equals("CONN_ERR")) {
+            clientSocket.close();
             throw new CantConnectException();
-        } else if (!in.readLine().equals("CONN_OK")) {
+        } else if (!message.equals("CONN_OK")) {
+            clientSocket.close();
             throw new IncorrectDeviceException();
         }
     }
@@ -34,15 +38,16 @@ public class Client {
         int count = 1;
         String message;
         do {
-            in.close();
-            out.close();
-            clientSocket.close();
+            out.println("DISCONN");
             message = in.readLine();
         } while (!message.equals("DISCONN_OK") && count++ != 5);
-
+        in.close();
+        out.close();
+        clientSocket.close();
         if (message.equals("DISCONN_OK")) {
             isConnected = false;
         }
+
     }
 
     //TODO catch les ioException et throw les bonnes exc
