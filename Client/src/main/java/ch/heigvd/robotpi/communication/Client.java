@@ -28,7 +28,6 @@ public class Client {
             clientSocket.close();
             throw new IncorrectDeviceException();
         }
-        System.out.println("connected");
     }
 
     public boolean isConnected() {
