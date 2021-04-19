@@ -1,9 +1,6 @@
 package ch.heigvd.robotpi.communication;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,12 +15,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ClientGoodServerTest {
 
-    Client cli = new Client();
-
+    private static Client cli = new Client();
+    private static ClientGoodServerTest.Server srv = new ClientGoodServerTest.Server(2025, "bad");
+    private static Thread srvThread;
     @BeforeAll
     static void beforeAll() {
-        Thread srvThread = new Thread(new Server(2025, "good"));
+        srvThread = new Thread(new Server(2025, "good"));
         srvThread.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        try {
+            //srv.stop();
+            //srvThread.interrupt();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @BeforeEach
@@ -90,7 +98,7 @@ class ClientGoodServerTest {
     /**
      * This class implements a single-threaded TCP server.
      */
-    static class Server implements Runnable{
+    static class Server implements Runnable {
 
         final static Logger LOG = Logger.getLogger(Server.class.getName());
         private ServerSocket serverSocket;
@@ -105,7 +113,6 @@ class ClientGoodServerTest {
             try {
                 this.start();
                 this.serveClients();
-                this.stop();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -122,12 +129,12 @@ class ClientGoodServerTest {
         }
 
         public void start() throws IOException {
-            LOG.info("Start server...");
+            LOG.log(Level.INFO, "Start {0} server ...", serverType);
             serverSocket = new ServerSocket(port);
         }
 
         public void stop() throws IOException {
-            LOG.info("Cleaning up resources...");
+            LOG.log(Level.INFO, "Stop {0} server ...", serverType);
             clientSocket.close();
             in.close();
             out.close();
@@ -167,7 +174,7 @@ class ClientGoodServerTest {
                         case "FWD":
                             if (serverType.equals("good")) {
                                 out.println("FWD_OK");
-                                LOG.info("PIFWD_OKNG");
+                                LOG.info("FWD_OK");
                             } else {
                                 out.println("FWD_KO");
                                 LOG.info("FWD_KO");
@@ -186,7 +193,7 @@ class ClientGoodServerTest {
                             if (serverType.equals("good")) {
                                 out.println("ROTATE_LEFT_OK");
                                 LOG.info("ROTATE_LEFT_OK");
-                            }  else {
+                            } else {
                                 out.println("ROTATE_LEFT_KO");
                                 LOG.info("ROTATE_LEFT_KO");
                             }
@@ -216,12 +223,8 @@ class ClientGoodServerTest {
 
                     out.flush();
                 }
-
             }
         }
-
-
     }
-
 }
 

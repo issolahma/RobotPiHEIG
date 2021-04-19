@@ -1,25 +1,40 @@
 package ch.heigvd.robotpi.communication;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.IOException;
 
 class ClientBadServerTest {
-    Client cli = new Client();
+    private static Client cli = new Client();
+    private static ClientGoodServerTest.Server srv = new ClientGoodServerTest.Server(2025, "bad");
 
     @BeforeAll
     static void beforeAll() {
         Thread srvThread = new Thread(new ClientGoodServerTest.Server(2025, "bad"));
         srvThread.start();
+        try {
+            Thread.sleep(2000);
+            cli.connect("127.0.0.1");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @AfterEach
     void teardown() {
+    }
+
+    @AfterAll
+    static void afterAll() {
         try {
             cli.disconnect();
-        } catch (Exception e){
+            srv.stop();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -27,8 +42,7 @@ class ClientBadServerTest {
     @Test
     void pingTrowsException() {
         assertThrows(Client.LostConnectionException.class,
-                ()->{
-                    cli.connect("127.0.0.1");
+                () -> {
                     cli.ping();
                 });
     }
@@ -36,8 +50,7 @@ class ClientBadServerTest {
     @Test
     void goForwardTrowsException() {
         assertThrows(Client.RobotException.class,
-                ()->{
-                    cli.connect("127.0.0.1");
+                () -> {
                     cli.goForward();
                 });
     }
@@ -45,8 +58,7 @@ class ClientBadServerTest {
     @Test
     void goBackwardTrowsException() {
         assertThrows(Client.RobotException.class,
-                ()->{
-                    cli.connect("127.0.0.1");
+                () -> {
                     cli.goBackward();
                 });
     }
@@ -54,8 +66,7 @@ class ClientBadServerTest {
     @Test
     void goLeftTrowsException() {
         assertThrows(Client.RobotException.class,
-                ()->{
-                    cli.connect("127.0.0.1");
+                () -> {
                     cli.goLeft();
                 });
     }
@@ -63,8 +74,7 @@ class ClientBadServerTest {
     @Test
     void goRightTrowsException() {
         assertThrows(Client.RobotException.class,
-                ()->{
-                    cli.connect("127.0.0.1");
+                () -> {
                     cli.goRight();
                 });
     }
@@ -72,8 +82,7 @@ class ClientBadServerTest {
     @Test
     void stopTrowsException() {
         assertThrows(Client.RobotException.class,
-                ()->{
-                    cli.connect("127.0.0.1");
+                () -> {
                     cli.stop();
                 });
     }
