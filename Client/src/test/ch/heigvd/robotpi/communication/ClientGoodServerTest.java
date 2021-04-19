@@ -13,23 +13,32 @@ import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * This class test the client with a server that respond what is expected in protocol
+ */
 class ClientGoodServerTest {
 
     private static Client cli = new Client();
-    private static ClientGoodServerTest.Server srv = new ClientGoodServerTest.Server(2025, "bad");
-    private static Thread srvThread;
+
     @BeforeAll
     static void beforeAll() {
-        srvThread = new Thread(new Server(2025, "good"));
+        Thread srvThread = new Thread(new Server(2025, "good"));
         srvThread.start();
+        try {
+            // To be sure that the server is running (tests on github)
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @AfterAll
     static void afterAll() {
         try {
-            //srv.stop();
-            //srvThread.interrupt();
-        } catch (Exception e){
+            cli.connect("127.0.0.1");
+            // The stop() func is used here to stop the server
+            cli.stop();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -79,20 +88,15 @@ class ClientGoodServerTest {
 
     @Test
     void disconnectWorks() {
-        boolean result = false;
-        boolean expected = true;
-
-        try {
-            cli.connect("127.0.0.1");
-            if (cli.isConnected()) {
-                cli.disconnect();
-                if (!cli.isConnected())
-                    result = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        assertEquals(expected, result);
+        assertThrows(IOException.class,
+                () -> {
+                    cli.connect("127.0.0.1");
+                    if (cli.isConnected()) {
+                        cli.disconnect();
+                        if (!cli.isConnected())
+                            cli.goRight();
+                    }
+                });
     }
 
     /**
@@ -211,6 +215,9 @@ class ClientGoodServerTest {
                             if (serverType.equals("good")) {
                                 out.println("STOP");
                                 LOG.info("STOP");
+                                // To stop the server used in ClientGoodServerTest
+                                // The cli.stop() func isn't used in these test
+                                this.stop();
                             } else {
                                 out.println("STOPP");
                                 LOG.info("STOPP");
@@ -219,6 +226,10 @@ class ClientGoodServerTest {
                         case "DISCONN":
                             out.println("DISCONN_OK");
                             shouldRun = false;
+                            if (serverType.equals("bad"))
+                                // To stop the server used in ClientBadServerTest.
+                                // cli.dissconnect() is run only once after all tests completed.
+                                this.stop();
                     }
 
                     out.flush();
@@ -227,4 +238,5 @@ class ClientGoodServerTest {
         }
     }
 }
+
 

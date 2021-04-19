@@ -7,17 +7,18 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
-
+/**
+ * This class test the client with a server that doesn't respond what is expected in protocol
+ */
 class ClientBadServerTest {
     private static Client cli = new Client();
-    private static ClientGoodServerTest.Server srv = new ClientGoodServerTest.Server(2025, "bad");
 
     @BeforeAll
     static void beforeAll() {
-        Thread srvThread = new Thread(new ClientGoodServerTest.Server(2025, "bad"));
+        Thread srvThread = new Thread(new srvBKP(2025, "bad"));
         srvThread.start();
         try {
+            // To be sure that the server is running (tests on github)
             Thread.sleep(2000);
             cli.connect("127.0.0.1");
         } catch (Exception e) {
@@ -33,7 +34,6 @@ class ClientBadServerTest {
     static void afterAll() {
         try {
             cli.disconnect();
-            srv.stop();
         } catch (Exception e) {
             e.printStackTrace();
         }
