@@ -6,6 +6,7 @@
 package ch.heigvd.robotpi.userinterface;
 
 import ch.heigvd.robotpi.communication.Client;
+import ch.heigvd.robotpi.userinterface.settings.SettingsParams;
 import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,6 +23,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Properties;
+import java.util.concurrent.Semaphore;
 
 /**
  * The controller of the main window of the client's app
@@ -31,13 +34,14 @@ public class UIController {
    private Properties settings;
    private Semaphore mutex = new Semaphore(1);
    private Scene scene;
+   private String currentIpAddress;
+   private Thread workerThread;
    private Client client;
    private ConnectedWorker worker;
-
    /**
     * Boolean to know when a key is pressed
     */
-   private Boolean upPressed = false;
+   private boolean upPressed = false;
    private boolean rightPressed = false;
    private boolean leftPressed = false;
    private boolean downPressed = false;
@@ -57,52 +61,181 @@ public class UIController {
    @FXML private TextField TFConnectionAddress;
 
    /**
-    * Sets the scene linked to this controller
+    * Sets the scene linked to this controller and sets up all of it's components
     *
     * @param scene the scene
     */
    public void setScene(Scene scene) {
       this.scene = scene;
+      //Load settings
+      settings = new Properties();
+      try {
+         settings.load(getClass().getClassLoader().getResourceAsStream("settings.properties"));
+      } catch (IOException e) {
+         e.printStackTrace();
+         Util.createAlertFrame(Alert.AlertType.ERROR, "Error while loading the properties",
+                               "Error while loading the properties",
+                               "There was an error while loading the properties, the app will close.");
+         this.close();
+      }
 
-      scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
-         switch (keyEvent.getCode()) {
-            case LEFT:
-               leftPressed = true;
-               break;
-            case RIGHT:
-               rightPressed = true;
-               break;
-            case DOWN:
-               downPressed = true;
-               break;
-            case UP:
-               upPressed = true;
-               break;
-            default:
-               break;
-         }
-      });
-      scene.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
-         switch (keyEvent.getCode()) {
-            case LEFT:
-               leftPressed = false;
-               break;
-            case RIGHT:
-               rightPressed = false;
-               break;
-            case DOWN:
-               downPressed = false;
-               break;
-            case UP:
-               upPressed = false;
-               break;
-            default:
-               break;
-         }
-      });
-      scene.getRoot().requestFocus();
+      currentIpAddress = settings.getProperty(SettingsParams.IP_ADDRESS.getParamName());
+      System.out.println(currentIpAddress);
 
-      //Setup buttons pressed
+      //Process settings
+      if (!currentIpAddress.equals("")) {
+         TFConnectionAddress.setText(currentIpAddress);
+      }
+
+      setupKeys();
+      setupButtons();
+   }
+
+   /**
+    * Loads onto the stage the scene, and executes the basic setup for the ui
+    *
+    * @param primaryStage the primary stage
+    */
+   public void load(Stage primaryStage) {
+      client = new Client();
+      worker = new ConnectedWorker();
+      workerThread = new Thread(worker);
+      workerThread.start();
+      primaryStage.setScene(scene);
+      primaryStage.showingProperty().addListener(((observableValue, oldValue, showing) -> {
+         if (showing) {
+            primaryStage.setMinHeight(primaryStage.getHeight());
+            primaryStage.setMinWidth(primaryStage.getWidth());
+         }
+      }));
+      primaryStage.setTitle("Robot PI HEIG");
+      //handles key pressing
+      AnimationTimer timer = new AnimationTimer() {
+         @Override
+         public void handle(long l) {
+            if (worker.connected) {
+               try {
+                  mutex.acquire();
+                  if (upPressed) {
+                     if (leftPressed) {
+                        client.goFrontLeft();
+                     } else if (rightPressed) {
+                        client.goFrontRight();
+                     } else if (!downPressed) {
+                        client.goForward();
+                     }
+                  } else if (downPressed) {
+                     if (leftPressed) {
+                        client.goBackwardsLeft();
+                     } else if (rightPressed) {
+                        client.goBackwardsRight();
+                     } else {
+                        client.goBackward();
+                     }
+                  } else if (leftPressed) {
+                     if (!rightPressed) {
+                        client.goLeft();
+                     }
+                  } else if (rightPressed) {
+                     client.goRight();
+                  } else {//robot ne bouge pas
+                     if (client.isMoving()) { //si le robot n'est pas encore immobilisé
+                        client.stop();
+                     }
+                  }
+               } catch (IOException e) {
+                  e.printStackTrace();
+               } catch (Client.RobotException e) {
+                  e.printStackTrace();
+                  Util.createAlertFrame(Alert.AlertType.ERROR, "Error while trying to move",
+                                        "Error while trying to move",
+                                        "The robot seems to have had an error while moving. Please check the robot " +
+                                        "and " + "make sure he is not blocked.");
+               } catch (InterruptedException e) {
+                  e.printStackTrace();
+               } finally {
+                  mutex.release();
+               }
+
+
+            }
+         }
+      };
+
+      timer.start();
+   }
+
+   /**
+    * Closes the ui
+    */
+   public void close() {
+      settings.setProperty(SettingsParams.IP_ADDRESS.getParamName(), currentIpAddress);
+      if (worker != null) {
+         worker.signalShutdown();
+         try {
+            synchronized (worker) {
+               worker.notify();
+            }
+            workerThread.join();
+         } catch (InterruptedException e) {
+            e.printStackTrace();
+         }
+      }
+      try {
+         mutex.acquire();
+         if (client != null && client.isConnected()) {
+            client.disconnect();
+         }
+      } catch (IOException e) {
+         e.printStackTrace();
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      } finally {
+         mutex.release();
+      }
+
+   }
+
+   @FXML
+   public void connectButtonPressed(ActionEvent event) {
+      if (TFConnectionAddress.getText().isEmpty()) {
+         Util.createAlertFrame(Alert.AlertType.WARNING, "No ip adress", "No ip adress",
+                               "Please write the ip adress of the targeted robot before pressing connect.");
+      }
+      String ipAdress = TFConnectionAddress.getText();
+      if (ipAdress.matches("(?<!\\d|\\d\\.)(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                           "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])(?!\\d|\\.\\d)")) {
+         try {
+            mutex.acquire();
+            client.connect(ipAdress);
+            worker.setConnected();
+            currentIpAddress = ipAdress;
+            synchronized (worker) {
+               worker.notify();
+            }
+         } catch (Client.CantConnectException e) {
+            e.printStackTrace();
+            Util.createAlertFrame(Alert.AlertType.ERROR, "Error with the robot", "Error with the robot",
+                                  "The robot had an issue while connecting to the client. Please restart the robot " +
+                                  "then try again");
+         } catch (IOException | Client.IncorrectDeviceException e) {
+            e.printStackTrace();
+            Util.createAlertFrame(Alert.AlertType.ERROR, "Wrong ip adress", "Wrong ip adress",
+                                  "The ip adress you wrote does not coincide with that of a robot. Please check the " +
+                                  "ip adress of the robot and try again.");
+         } catch (InterruptedException e) {
+            e.printStackTrace();
+         } finally {
+            mutex.release();
+         }
+      } else {
+         Util.createAlertFrame(Alert.AlertType.ERROR, "Not an ip adress", "Not an ip adress",
+                               "The adress you provided is not a valid ip adress. Please try again.");
+      }
+
+   }
+
+   private void setupButtons() {
       BBackwards.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
          if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
             downPressed = true;
@@ -206,98 +339,53 @@ public class UIController {
       addImageToButton(BCamera, "image/Camera.png");
    }
 
+   private void setupKeys() {
+      scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+         switch (keyEvent.getCode()) {
+            case LEFT:
+               leftPressed = true;
+               break;
+            case RIGHT:
+               rightPressed = true;
+               break;
+            case DOWN:
+               downPressed = true;
+               break;
+            case UP:
+               upPressed = true;
+               break;
+            default:
+               break;
+         }
+      });
+      scene.addEventFilter(KeyEvent.KEY_RELEASED, keyEvent -> {
+         switch (keyEvent.getCode()) {
+            case LEFT:
+               leftPressed = false;
+               break;
+            case RIGHT:
+               rightPressed = false;
+               break;
+            case DOWN:
+               downPressed = false;
+               break;
+            case UP:
+               upPressed = false;
+               break;
+            default:
+               break;
+         }
+      });
+      scene.getRoot().requestFocus();
+   }
+
    /**
-    * Loads onto the stage the scene, and executes the basic setup for the ui
+    * Adds an image to the given button, and sets up the button so it can conveniently show the image
     *
-    * @param primaryStage the primary stage
+    * @param b        the button to setup
+    * @param imageSrc the path to the image
     */
-   public void load(Stage primaryStage) {
-      client = new Client();
-      worker = new ConnectedWorker();
-      primaryStage.setScene(scene);
-      primaryStage.showingProperty().addListener(((observableValue, oldValue, showing) -> {
-         if (showing) {
-            primaryStage.setMinHeight(primaryStage.getHeight());
-            primaryStage.setMinWidth(primaryStage.getWidth());
-         }
-      }));
-      primaryStage.setTitle("Robot PI HEIG");
-      //handles key pressing
-      AnimationTimer timer = new AnimationTimer() {
-         @Override
-         public void handle(long l) {
-            try {
-               if (worker.connected) {
-                  if (upPressed) {
-                     if (leftPressed) {
-                        client.goFrontLeft();
-                     } else if (rightPressed) {
-                        client.goFrontRight();
-                     } else if (!downPressed) {
-                        client.goForward();
-                     }
-                  } else if (downPressed) {
-                     if (leftPressed) {
-                        client.goBackwardsLeft();
-                     } else if (rightPressed) {
-                        client.goBackwardsRight();
-                     } else {
-                        client.goBackward();
-                     }
-                  } else if (leftPressed) {
-                     if (!rightPressed) {
-                        client.goLeft();
-                     }
-                  } else if (rightPressed) {
-                     client.goRight();
-                  } else {//robot ne bouge pas
-                     if (client.isMoving()) { //si le robot n'est pas encore immobilisé
-                        client.stop();
-                     }
-                  }
-               }
-            } catch (IOException e) {
-               e.printStackTrace();
-            } catch (Client.RobotException e) {
-               e.printStackTrace();
-            }
-         }
-      };
-      timer.start();
-   }
-
-   /**
-    * Closes the ui
-    */
-   public void close() {
-      worker.signalShutdown();
-   }
-
-   @FXML
-   public void connectButtonPressed(ActionEvent event) {
-      if (TFConnectionAddress.getText().isEmpty()) {
-         Util.createAlertFrame(Alert.AlertType.WARNING, "No ip adress", "No ip adress",
-                               "Please write the ip adress of the targeted robot before pressing connect.");
-      }
-      String ipAdress = TFConnectionAddress.getText();
-      if (ipAdress.matches("(?<!\\d|\\d\\.)(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                           "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])(?!\\d|\\.\\d)")) {
-         if (!client.connect(ipAdress)) {
-            Util.createAlertFrame(Alert.AlertType.ERROR, "Wrong ip adress", "Wrong ip adress",
-                                  "The ip adress you wrote does not coincide with that of a robot. Please check the " +
-                                  "ip adress of the robot and try again.");
-         } else {
-            worker.setConnected();
-         }
-      } else {
-         Util.createAlertFrame(Alert.AlertType.ERROR, "Not an ip adress", "Not an ip adress",
-                               "The adress you provided is not a valid ip adress. Please try again.");
-      }
-
-   }
-
    private void addImageToButton(Button b, String imageSrc) {
-
       ImageView i = new ImageView(new Image(getClass().getClassLoader().getResourceAsStream(imageSrc)));
       i.setFitWidth(90);
       i.setFitHeight(90);
@@ -318,6 +406,7 @@ public class UIController {
        */
       public void signalShutdown() {
          this.running = false;
+         connected = false;
       }
 
       /**
@@ -335,33 +424,42 @@ public class UIController {
        */
       public void setConnected() {
          this.connected = true;
-         this.notify();
+         LConnectionStatus.setText("Connected");
       }
 
       @Override
       public void run() {
          while (running) {
             if (!connected) {
-               try {
-                  this.wait();
-               } catch (InterruptedException e) {
-                  e.printStackTrace();
+               synchronized (this) {
+                  try {
+                     wait();
+                  } catch (InterruptedException e) {
+                     e.printStackTrace();
+                  }
                }
             }
-            LConnectionStatus.setText("Connected");
             while (connected) {
-               if (!client.isConnected()) {
-                  connected = false;
-                  LConnectionStatus.setText("Disconnected");
+               try {
+                  mutex.acquire();
+                  if (!client.isConnected()) {
+                     connected = false;
+                     LConnectionStatus.setText("Disconnected");
+                  }
+               } catch (InterruptedException e) {
+                  e.printStackTrace();
+               } finally {
+                  mutex.release();
                }
                try {
-                  Thread.sleep(20000);
+                  System.out.println("Sleeping");
+                  Thread.sleep(10000);
                } catch (InterruptedException e) {
                   e.printStackTrace();
                }
             }
          }
-
+         System.out.println("Exiting");
       }
    }
 }
