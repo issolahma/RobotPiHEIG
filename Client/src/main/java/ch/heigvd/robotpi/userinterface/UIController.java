@@ -109,6 +109,7 @@ public class UIController {
          }
       }));
       primaryStage.setTitle("Robot PI HEIG");
+      primaryStage.getIcons().add(new Image("image/logo.png"));
       //handles key pressing
       AnimationTimer timer = new AnimationTimer() {
          @Override
