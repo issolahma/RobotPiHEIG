@@ -27,6 +27,9 @@ import java.io.IOException;
  * The controller of the main window of the client's app
  */
 public class UIController {
+   //Settings
+   private Properties settings;
+   private Semaphore mutex = new Semaphore(1);
    private Scene scene;
    private Client client;
    private ConnectedWorker worker;
