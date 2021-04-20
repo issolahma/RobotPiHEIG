@@ -33,8 +33,8 @@ import java.util.concurrent.Semaphore;
  */
 public class UIController {
    //Settings
-   Properties settings;
-   Semaphore mutex = new Semaphore(1);
+   private Properties settings;
+   private Semaphore mutex = new Semaphore(1);
    private Scene scene;
    private String currentIpAddress;
    private Thread workerThread;
@@ -117,6 +117,7 @@ public class UIController {
          }
       }));
       primaryStage.setTitle("Robot PI HEIG");
+      primaryStage.getIcons().add(new Image("image/logo.png"));
       //handles key pressing
       AnimationTimer timer = new AnimationTimer() {
          @Override
