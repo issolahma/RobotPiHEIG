@@ -25,12 +25,14 @@ void *session_task(void *ptr) {
     bzero(response, CMD_LEN);
     int n;
     explicit_bzero(buffer, BUFFER_SIZE);
+    /*
     n = send(client_sockfd, WELCOME_MSG, strlen(WELCOME_MSG), 0);
     if (n < 0) {
         fprintf(stderr, "Error sending message\n");
         pthread_exit(NULL);
     }
     buffer[n] = '\0';
+    */
     while (1) {
         n = recv(client_sockfd, buffer, BUFFER_SIZE, 0);
         if (n < 0) {
@@ -67,7 +69,7 @@ void *session_task(void *ptr) {
                 process_cmd(cmd, response);
             }
         }
-
+        fprintf(stdout, "Sending message: %s\n", response);
         n = send(client_sockfd, response, CMD_LEN, 0);
         if (n < 0) {
             fprintf(stderr, "Error sending response\n");
