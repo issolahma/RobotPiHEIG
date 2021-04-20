@@ -21,6 +21,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import jfxtras.styles.jmetro.JMetro;
+import jfxtras.styles.jmetro.Style;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -87,8 +89,14 @@ public class UIController {
          TFConnectionAddress.setText(currentIpAddress);
       }
 
+      //Setup interaction
       setupKeys();
       setupButtons();
+
+      //Setup skin
+      JMetro jMetro = new JMetro(Style.LIGHT);
+      jMetro.setScene(scene);
+
    }
 
    /**
