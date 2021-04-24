@@ -24,7 +24,10 @@ import javafx.stage.Stage;
 import jfxtras.styles.jmetro.JMetro;
 import jfxtras.styles.jmetro.Style;
 
+import java.awt.*;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
 
@@ -206,10 +209,29 @@ public class UIController {
    }
 
    @FXML
-   public void connectButtonPressed(ActionEvent event) {
+   private void pressOnClose(ActionEvent event) {
+      ((Stage)LConnectionStatus.getScene().getWindow()).close();
+   }
+
+   @FXML
+   private void openAboutPage(ActionEvent event) {
+      try {
+         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            Desktop.getDesktop().browse(new URI("https://github.com/RobotPiProject/RobotPiHEIG"));
+         }
+      } catch (IOException e) {
+         e.printStackTrace();
+      } catch (URISyntaxException e) {
+         e.printStackTrace();
+      }
+   }
+
+   @FXML
+   private void connectButtonPressed(ActionEvent event) {
       if (TFConnectionAddress.getText().isEmpty()) {
          Util.createAlertFrame(Alert.AlertType.WARNING, "No ip adress", "No ip adress",
                                "Please write the ip adress of the targeted robot before pressing connect.");
+         return;
       }
       String ipAdress = TFConnectionAddress.getText();
       if (ipAdress.matches("(?<!\\d|\\d\\.)(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
@@ -402,6 +424,8 @@ public class UIController {
       b.setMaxWidth(i.getFitWidth());
       b.setGraphic(i);
    }
+
+
 
    /**
     * The worker used to keep the connected RadioButton up to date
