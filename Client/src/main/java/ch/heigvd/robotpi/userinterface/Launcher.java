@@ -32,7 +32,7 @@ public class Launcher extends Application {
 
    @Override
    public void stop() throws Exception {
-      controller.close();
       super.stop();
+      controller.close();
    }
 }
