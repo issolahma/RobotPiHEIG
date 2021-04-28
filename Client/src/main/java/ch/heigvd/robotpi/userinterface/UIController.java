@@ -37,7 +37,7 @@ import java.util.concurrent.Semaphore;
 public class UIController {
    //Settings
    private Properties settings;
-   private Semaphore mutex = new Semaphore(1);
+   private final Semaphore mutex = new Semaphore(1);
    private Scene scene;
    private String currentIpAddress;
    private Thread workerThread;
@@ -163,7 +163,6 @@ public class UIController {
                } catch (IOException e) {
                   e.printStackTrace();
                } catch (Client.RobotException e) {
-                  e.printStackTrace();
                   Util.createAlertFrame(Alert.AlertType.ERROR, "Error while trying to move",
                                         "Error while trying to move",
                                         "The robot seems to have had an error while moving. Please check the robot " +
