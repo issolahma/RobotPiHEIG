@@ -1,19 +1,19 @@
-# Set to the address of the Raspberry Pi
-PI_ADDR = 192.168.0.66
-
-# Toolchain and sysroot location
 TOOLCHAIN = armv8-rpi3-linux-gnueabihf
 TOOLCHAIN_DIR = /opt/x-tools/$(TOOLCHAIN)
-SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/sysroot/
+SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/sysroot/ #TOOLCHAIN_DIR inclut déjà TOOLCHAIN
 BUILDTOOLS = $(TOOLCHAIN_DIR)/bin/$(TOOLCHAIN)
 
 CC = gcc
 LD = ld
+AR = ar
 CFLAGS = -g -Wall
-LDFLAGS = -lc -pthread
+LDFLAGS = -lc -pthread -lbcm2835 -lm
+ARFLAGS = -crs
 TARGETFOLDER = bin
 APPNAME = RoboPiServer
 TEST_APPNAME = RoboPiServerTest
+LIBNAME = libMotor.a
+LIBDIR = src/motorLib
 
 SUBDIR = src
 INCLUDE_DIR = $(SUBDIR)/include
@@ -29,7 +29,11 @@ OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:c=o))
 TEST_OBJS = $(addprefix $(TEST_OBJ_DIR)/, $(TEST_SRCS:c=o))
 DEPS = $(wildcard *.h $(foreach dir, $(INCLUDE_DIR), $(dir)/*.h))
 
+LIBSRCS = $(wildcard $(LIBDIR)/*.c)
+LIBOBJS = $(addprefix $(OBJ_DIR)/, $(LIBSRCS:.c=.o))
+
 .PHONY: clean
+.PHONY: lib
 
 all: $(OUT_DIR)/$(APPNAME) $(TEST_OUT_DIR)/$(TEST_APPNAME)
 
@@ -58,9 +62,14 @@ clean:
 deploy: $(OUT_DIR)/$(APPNAME)
 	scp $^ pi@$(PI_ADDR):/home/pi
 
-test: 
+test:
 
 new_file:
 	@echo "Entrez le nom des fichiers que vous voulez créer"
 	@read fileName; \
 	touch src/$$fileName.c src/include/$$fileName.h test/test_$$fileName.c
+
+lib: $(LIBNAME)
+
+$(LIBNAME): $(LIBOBJS)
+	$(TOOLCHAIN)-$(AR) $(ARFLAGS) $(LIBNAME) $(LIBOBJS)
