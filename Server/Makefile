@@ -1,6 +1,8 @@
 TOOLCHAIN = armv8-rpi3-linux-gnueabihf
 TOOLCHAIN_DIR = /opt/x-tools/$(TOOLCHAIN)
-SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/sysroot/ #TOOLCHAIN_DIR inclut déjà TOOLCHAIN
+SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/sysroot
+HEADERS = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/include
+LIBS = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/lib
 BUILDTOOLS = $(TOOLCHAIN_DIR)/bin/$(TOOLCHAIN)
 
 CC = gcc
@@ -22,6 +24,7 @@ OUT_DIR = ./bin
 TEST_OUT_DIR = ./test_bin
 OBJ_DIR = ./build
 TEST_OBJ_DIR = ./test_build
+MOTORLIB = src/motorLib
 
 SRCS = $(wildcard *.c $(foreach dir, $(SUBDIR), $(dir)/*.c))
 TEST_SRCS = $(wildcard *.c $(foreach dir, $(TEST_SUBDIR), $(dir)/*.c))
@@ -37,7 +40,7 @@ LIBOBJS = $(addprefix $(OBJ_DIR)/, $(LIBSRCS:.c=.o))
 
 all: $(OUT_DIR)/$(APPNAME) $(TEST_OUT_DIR)/$(TEST_APPNAME)
 
-$(OUT_DIR)/$(APPNAME): $(OBJS)
+$(OUT_DIR)/$(APPNAME): lib $(OBJS)
 	mkdir -p $(@D)
 	$(BUILDTOOLS)-$(CC) $(OBJS) $(LDFLAGS) -o $@
 
@@ -58,6 +61,7 @@ clean:
 	rm -rf $(OBJ_DIR)/*
 	rm -rf $(TEST_OUT_DIR)/*
 	rm -rf $(TEST_OBJ_DIR)/*
+	rm -f $(LIBNAME)
 
 deploy: $(OUT_DIR)/$(APPNAME)
 	scp $^ pi@$(PI_ADDR):/home/pi
@@ -72,4 +76,5 @@ new_file:
 lib: $(LIBNAME)
 
 $(LIBNAME): $(LIBOBJS)
-	$(TOOLCHAIN)-$(AR) $(ARFLAGS) $(LIBNAME) $(LIBOBJS)
+	$(BUILDTOOLS)-$(AR) $(ARFLAGS) $(LIBS)/$@ $(LIBOBJS)
+	cp $(MOTORLIB)/*.h $(HEADERS)/
