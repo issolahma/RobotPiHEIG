@@ -21,18 +21,10 @@ void *session_task(void *ptr) {
     char buffer[BUFFER_SIZE];
     char cmd[CMD_LEN];
     char response[CMD_LEN];
-    bzero(cmd, CMD_LEN);
-    bzero(response, CMD_LEN);
-    int n;
     explicit_bzero(buffer, BUFFER_SIZE);
-    /*
-    n = send(client_sockfd, WELCOME_MSG, strlen(WELCOME_MSG), 0);
-    if (n < 0) {
-        fprintf(stderr, "Error sending message\n");
-        pthread_exit(NULL);
-    }
-    buffer[n] = '\0';
-    */
+    explicit_bzero(cmd, CMD_LEN);
+    explicit_bzero(response, CMD_LEN);
+    int n, res_len;
     while (1) {
         n = recv(client_sockfd, buffer, BUFFER_SIZE, 0);
         if (n < 0) {
@@ -45,23 +37,24 @@ void *session_task(void *ptr) {
         }
         buffer[n] = '\0';
         fprintf(stdout, "Message received: %s", buffer);
-        strcpy(cmd, buffer);
+        strncpy(cmd, buffer, CMD_LEN);
+        // strip new line
         cmd[strcspn(cmd, "\n")] = 0;
 
         /* We don't accept commands if there is no application-level connection */
         if (!client_connected) {
-            if (!strcmp(cmd, "DISCONN")) {
+            if (!strncmp(cmd, "DISCONN", CMD_LEN)) {
                 put_response(response, DISCONN_ERR);
-            } else if (strcmp(cmd, "CONN") != 0) {
+            } else if (strncmp(cmd, "CONN", CMD_LEN)) {
                 put_response(response, CMD_ERR);
             } else {
                 client_connected = 1;
                 put_response(response, CONN_OK);
             }
         } else {
-            if (!strcmp(cmd, "CONN")) {
+            if (!strncmp(cmd, "CONN", CMD_LEN)) {
                 put_response(response, CONN_ERR);
-            } else if (!strcmp(cmd, "DISCONN")) {
+            } else if (!strncmp(cmd, "DISCONN", CMD_LEN)) {
                 client_connected = 0;
                 put_response(response, DISCONN_OK);
             } else {
@@ -69,12 +62,17 @@ void *session_task(void *ptr) {
                 process_cmd(cmd, response);
             }
         }
+
         fprintf(stdout, "Sending message: %s\n", response);
-        n = send(client_sockfd, response, CMD_LEN, 0);
+
+        // append new line character
+        res_len = strlen(response);
+        response[res_len] = '\n';
+        n = send(client_sockfd, response, res_len+1, 0);
+        fprintf(stdout, "%d bytes sent\n", n);
         if (n < 0) {
             fprintf(stderr, "Error sending response\n");
         }
-        buffer[n] = '\0';
         bzero(cmd, CMD_LEN);
         bzero(response, CMD_LEN);
     }
@@ -113,9 +111,9 @@ int server() {
         pthread_create(&session_t, NULL, session_task, (void *) &client_sockfd);
         pthread_join(session_t, NULL);
         close(client_sockfd);
-        close(server_sockfd);
         fprintf(stdout, "Bye\n");
         break;
     }
+    close(server_sockfd);
     return 1;
 }
