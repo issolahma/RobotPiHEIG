@@ -1,3 +1,5 @@
+PI_ADDR = 192.168.0.66
+
 TOOLCHAIN = armv8-rpi3-linux-gnueabihf
 TOOLCHAIN_DIR = /opt/x-tools/$(TOOLCHAIN)
 SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/sysroot
@@ -15,7 +17,6 @@ TARGETFOLDER = bin
 APPNAME = RoboPiServer
 TEST_APPNAME = RoboPiServerTest
 LIBNAME = libMotor.a
-LIBDIR = src/motorLib
 
 SUBDIR = src
 INCLUDE_DIR = $(SUBDIR)/include
@@ -24,7 +25,7 @@ OUT_DIR = ./bin
 TEST_OUT_DIR = ./test_bin
 OBJ_DIR = ./build
 TEST_OBJ_DIR = ./test_build
-MOTORLIB = src/motorLib
+MOTORLIB_SRCDIR = src/motorLib
 
 SRCS = $(wildcard *.c $(foreach dir, $(SUBDIR), $(dir)/*.c))
 TEST_SRCS = $(wildcard *.c $(foreach dir, $(TEST_SUBDIR), $(dir)/*.c))
@@ -32,7 +33,7 @@ OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:c=o))
 TEST_OBJS = $(addprefix $(TEST_OBJ_DIR)/, $(TEST_SRCS:c=o))
 DEPS = $(wildcard *.h $(foreach dir, $(INCLUDE_DIR), $(dir)/*.h))
 
-LIBSRCS = $(wildcard $(LIBDIR)/*.c)
+LIBSRCS = $(wildcard $(MOTORLIB_SRCDIR)/*.c)
 LIBOBJS = $(addprefix $(OBJ_DIR)/, $(LIBSRCS:.c=.o))
 
 .PHONY: clean
@@ -77,4 +78,4 @@ lib: $(LIBNAME)
 
 $(LIBNAME): $(LIBOBJS)
 	$(BUILDTOOLS)-$(AR) $(ARFLAGS) $(LIBS)/$@ $(LIBOBJS)
-	cp $(MOTORLIB)/*.h $(HEADERS)/
+	cp $(MOTORLIB_SRCDIR)/*.h $(HEADERS)/
