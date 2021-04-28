@@ -85,7 +85,6 @@ public class UIController {
       }
 
       currentIpAddress = settings.getProperty(SettingsParams.IP_ADDRESS.getParamName());
-      System.out.println(currentIpAddress);
 
       //Process settings
       if (!currentIpAddress.equals("")) {
@@ -235,7 +234,8 @@ public class UIController {
       }
       String ipAdress = TFConnectionAddress.getText();
       if (ipAdress.matches("(?<!\\d|\\d\\.)(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-                           "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])(?!\\d|\\.\\d)")) {
+                           "(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.(?:[01]?\\d\\d?|2[0-4]\\d|25[0-5])(?!\\d|\\.\\d)") ||
+          ipAdress.equals("localhost") || ipAdress.equals("raspberrypi")) {
          try {
             mutex.acquire();
             client.connect(ipAdress);
