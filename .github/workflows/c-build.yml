@@ -35,4 +35,7 @@ jobs:
           ./toolchain.sh rpi3-armv8-dev --pull --export
           cp x-tools /opt -r
           cd ../../Server
+          
+          * SSL cert/key creation
+          openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:4096 -keyout key.pem -out robotpi.pem
           make
