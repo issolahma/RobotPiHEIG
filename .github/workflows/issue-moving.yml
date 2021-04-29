@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Triage to project board
-        uses: rachmari/actions-add-new-issue-to-column@1a459ef92308ba7c9c9dc2fcdd72f232495574a9
+        uses: davidgl17/moverpi@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
         with:
           action-token: ${{ secrets.GITHUB_TOKEN }}
           project-url: 'https://github.com/RobotPiProject/RobotPiHEIG/projects/1'
