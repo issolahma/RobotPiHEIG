@@ -1,9 +1,67 @@
 #include "include/server.h"
 #include "include/protocol.h"
 
+#include <openssl/applink.c>
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 const char *WELCOME_MSG = "Welcome to RoboPi!\n";
 int client_connected = 0;
 int server_sockfd = 0, client_sockfd = 0;
+SSL *ssl; // A passer à la fonction?
+
+void InitializeSSL()
+{
+    SSL_load_error_strings();
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+}
+
+void DestroySSL()
+{
+    ERR_free_strings();
+    EVP_cleanup();
+}
+
+void ShutdownSSL()
+{
+    SSL_shutdown(cSSL);
+    SSL_free(cSSL);
+}
+
+SSL_CTX *create_context()
+{
+    const SSL_METHOD *method;
+    SSL_CTX *ctx;
+
+    method = TLS_method();
+
+    ctx = SSL_CTX_new(method);
+    if (!ctx) {
+	perror("Unable to create SSL context");
+	ERR_print_errors_fp(stderr);
+	exit(EXIT_FAILURE);
+    }
+
+    return ctx;
+}
+
+void configure_context(SSL_CTX *ctx)
+{
+    SSL_CTX_set_ecdh_auto(ctx, 1);
+
+    /* Set the key and cert */
+    if (SSL_CTX_use_certificate_file(ctx, "robotpi.pem", SSL_FILETYPE_PEM) <= 0) {
+        ERR_print_errors_fp(stderr);
+	exit(EXIT_FAILURE);
+    }
+
+    if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0 ) {
+        ERR_print_errors_fp(stderr);
+	exit(EXIT_FAILURE);
+    }
+}
 
 static void close_socks_on_sigint(int signo) {
     fprintf(stdout, "Received SIGINT signal\n");
@@ -26,6 +84,7 @@ void *session_task(void *ptr) {
     explicit_bzero(response, CMD_LEN);
     int n, res_len;
     while (1) {
+		// TODO SSL write
         n = recv(client_sockfd, buffer, BUFFER_SIZE, 0);
         if (n < 0) {
             fprintf(stderr, "Error reading socket\n");
@@ -68,7 +127,8 @@ void *session_task(void *ptr) {
         // append new line character
         res_len = strlen(response);
         response[res_len] = '\n';
-        n = send(client_sockfd, response, res_len+1, 0);
+        //n = send(client_sockfd, response, res_len+1, 0);
+        n = SSL_write(ssl, response, strlen(response));
         fprintf(stdout, "%d bytes sent\n", n);
         if (n < 0) {
             fprintf(stderr, "Error sending response\n");
@@ -82,6 +142,12 @@ int server() {
     signal(SIGINT, close_socks_on_sigint);
     struct sockaddr_in server_addr, cli_addr;
     pthread_t session_t;
+    
+    // TLS
+    init_openssl();
+    SSL_CTX *ctx = create_context();
+    configure_context(ctx);
+    
     server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_sockfd == -1) {
         fprintf(stderr, "Could not create socket\n");
@@ -107,12 +173,23 @@ int server() {
             fprintf(stderr, "Error on accept");
             return EXIT_FAILURE;
         }
-        fprintf(stdout, "Connection established\n");
-        pthread_create(&session_t, NULL, session_task, (void *) &client_sockfd);
-        pthread_join(session_t, NULL);
-        close(client_sockfd);
-        fprintf(stdout, "Bye\n");
-        break;
+        
+        // TLS
+        ssl = SSL_new(ctx);
+        SSL_set_fd(ssl, client_sockfd);
+        
+        if (SSL_accept(ssl) <= 0) {
+            ERR_print_errors_fp(stderr);
+            return EXIT_FAILURE;
+        }
+        else {
+			fprintf(stdout, "Connection established\n");
+			pthread_create(&session_t, NULL, session_task, (void *) &client_sockfd);
+			pthread_join(session_t, NULL);
+			close(client_sockfd);
+			fprintf(stdout, "Bye\n");
+			break;
+		}
     }
     close(server_sockfd);
     return 1;
