@@ -9,7 +9,7 @@
 const char *WELCOME_MSG = "Welcome to RoboPi!\n";
 int client_connected = 0;
 int server_sockfd = 0, client_sockfd = 0;
-SSL *ssl; // A passer à la fonction?
+SSL *ssl; // A passer à la fonction??
 
 void InitializeSSL()
 {
