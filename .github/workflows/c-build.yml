@@ -30,6 +30,7 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Server build 
         run: |
+          echo --openssl--
           openssl version
           git clone https://github.com/tttapa/RPi-Cpp-Toolchain.git
           cd RPi-Cpp-Toolchain/toolchain
