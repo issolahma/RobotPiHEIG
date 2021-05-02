@@ -1,19 +1,22 @@
 #include "include/server.h"
 #include "include/protocol.h"
 
-#include <openssl/applink.c>
+// #include <openssl/applink.c>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+
 const char *WELCOME_MSG = "Welcome to RoboPi!\n";
 int client_connected = 0;
 int server_sockfd = 0, client_sockfd = 0;
-SSL *ssl; // A passer à la fonction??
+SSL *ssl; // A passer à la fonction?
 
 void InitializeSSL()
 {
+    // Provide human-readable error messages.
     SSL_load_error_strings();
+    // Register ciphers.
     SSL_library_init();
     OpenSSL_add_all_algorithms();
 }
@@ -26,8 +29,8 @@ void DestroySSL()
 
 void ShutdownSSL()
 {
-    SSL_shutdown(cSSL);
-    SSL_free(cSSL);
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
 }
 
 SSL_CTX *create_context()
@@ -52,12 +55,12 @@ void configure_context(SSL_CTX *ctx)
     SSL_CTX_set_ecdh_auto(ctx, 1);
 
     /* Set the key and cert */
-    if (SSL_CTX_use_certificate_file(ctx, "robotpi.pem", SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_certificate_file(ctx, "/home/maude/Documents/PRO/FORK/RobotPiHEIG/Server/src/robotpi.pem", SSL_FILETYPE_PEM) <= 0) {
         ERR_print_errors_fp(stderr);
 	exit(EXIT_FAILURE);
     }
 
-    if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0 ) {
+    if (SSL_CTX_use_PrivateKey_file(ctx, "/home/maude/Documents/PRO/FORK/RobotPiHEIG/Server/src/key.pem", SSL_FILETYPE_PEM) <= 0 ) {
         ERR_print_errors_fp(stderr);
 	exit(EXIT_FAILURE);
     }
@@ -79,13 +82,23 @@ void *session_task(void *ptr) {
     char buffer[BUFFER_SIZE];
     char cmd[CMD_LEN];
     char response[CMD_LEN];
+    bzero(cmd, CMD_LEN);
+    bzero(response, CMD_LEN);
+    int n;
     explicit_bzero(buffer, BUFFER_SIZE);
-    explicit_bzero(cmd, CMD_LEN);
-    explicit_bzero(response, CMD_LEN);
-    int n, res_len;
+    
+    n = SSL_write(ssl, WELCOME_MSG, strlen(WELCOME_MSG));
+    if (n < 0) {
+        fprintf(stderr, "Error sending message\n");
+        pthread_exit(NULL);
+    }
+    buffer[n] = '\0';
+    
     while (1) {
-		// TODO SSL write
-        n = recv(client_sockfd, buffer, BUFFER_SIZE, 0);
+	fprintf(stdout, "while1\n"); // REMOVE------
+	n = SSL_read(ssl, buffer, BUFFER_SIZE);
+	fprintf(stdout, "while2\n"); // REMOVE------
+        //n = recv(client_sockfd, buffer, BUFFER_SIZE, 0);
         if (n < 0) {
             fprintf(stderr, "Error reading socket\n");
             pthread_exit(NULL);
@@ -96,24 +109,25 @@ void *session_task(void *ptr) {
         }
         buffer[n] = '\0';
         fprintf(stdout, "Message received: %s", buffer);
-        strncpy(cmd, buffer, CMD_LEN);
-        // strip new line
+        strcpy(cmd, buffer);
         cmd[strcspn(cmd, "\n")] = 0;
 
         /* We don't accept commands if there is no application-level connection */
         if (!client_connected) {
-            if (!strncmp(cmd, "DISCONN", CMD_LEN)) {
+            if (!strcmp(cmd, "DISCONN")) {
                 put_response(response, DISCONN_ERR);
-            } else if (strncmp(cmd, "CONN", CMD_LEN)) {
+            } else if (strcmp(cmd, "CONN") != 0) {
+		fprintf(stdout, "CONN1: %s --", cmd); // REMOVE------
                 put_response(response, CMD_ERR);
             } else {
                 client_connected = 1;
                 put_response(response, CONN_OK);
             }
         } else {
-            if (!strncmp(cmd, "CONN", CMD_LEN)) {
+            if (!strcmp(cmd, "CONN")) {
+		fprintf(stdout, "CONN2: %s --", cmd); // REMOVE------
                 put_response(response, CONN_ERR);
-            } else if (!strncmp(cmd, "DISCONN", CMD_LEN)) {
+            } else if (!strcmp(cmd, "DISCONN")) {
                 client_connected = 0;
                 put_response(response, DISCONN_OK);
             } else {
@@ -121,18 +135,13 @@ void *session_task(void *ptr) {
                 process_cmd(cmd, response);
             }
         }
-
         fprintf(stdout, "Sending message: %s\n", response);
-
-        // append new line character
-        res_len = strlen(response);
-        response[res_len] = '\n';
-        //n = send(client_sockfd, response, res_len+1, 0);
+        //n = send(client_sockfd, response, CMD_LEN, 0);
         n = SSL_write(ssl, response, strlen(response));
-        fprintf(stdout, "%d bytes sent\n", n);
         if (n < 0) {
             fprintf(stderr, "Error sending response\n");
         }
+        buffer[n] = '\0';
         bzero(cmd, CMD_LEN);
         bzero(response, CMD_LEN);
     }
@@ -144,7 +153,7 @@ int server() {
     pthread_t session_t;
     
     // TLS
-    init_openssl();
+    InitializeSSL();
     SSL_CTX *ctx = create_context();
     configure_context(ctx);
     
@@ -187,10 +196,13 @@ int server() {
 			pthread_create(&session_t, NULL, session_task, (void *) &client_sockfd);
 			pthread_join(session_t, NULL);
 			close(client_sockfd);
+			close(server_sockfd);
 			fprintf(stdout, "Bye\n");
-			break;
-		}
+			break;            
+        }        
+        
     }
-    close(server_sockfd);
+    ShutdownSSL();
+    DestroySSL();
     return 1;
 }

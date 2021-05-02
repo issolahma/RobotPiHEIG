@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import javax.net.ssl.*;
 
 public class Client {
     private Socket clientSocket;
@@ -15,19 +16,50 @@ public class Client {
     public final int PORT = 2025;
 
     public void connect(String ip) throws CantConnectException, IOException, IncorrectDeviceException {
-        clientSocket = new Socket(ip, PORT);
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        isConnected = true;
-        out.println("CONN");
-        String message = in.readLine();
-        if (message.equals("CONN_ERR")) {
-            clientSocket.close();
-            throw new CantConnectException();
-        } else if (!message.equals("CONN_OK")) {
-            clientSocket.close();
-            throw new IncorrectDeviceException();
+        //clientSocket = new Socket(ip, PORT);
+
+        SSLSocketFactory f = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        try {
+            SSLSocket clientSocket = (SSLSocket) f.createSocket(ip, PORT);
+
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+            printSocketInfo(clientSocket);
+            clientSocket.startHandshake();
+
+            isConnected = true;
+            out.println("CONN");
+            String message = in.readLine();
+
+            if (message.equals("CONN_ERR")) {
+                clientSocket.close();
+                throw new CantConnectException();
+            } else if (!message.equals("CONN_OK")) {
+                clientSocket.close();
+                throw new IncorrectDeviceException();
+            }
+        } catch (IOException e) {
+            System.err.println(e.toString());
         }
+    }
+
+    // TO REMOVE
+    private static void printSocketInfo(SSLSocket s) {
+        System.out.println("Socket class: "+s.getClass());
+        System.out.println("   Remote address = "
+                +s.getInetAddress().toString());
+        System.out.println("   Remote port = "+s.getPort());
+        System.out.println("   Local socket address = "
+                +s.getLocalSocketAddress().toString());
+        System.out.println("   Local address = "
+                +s.getLocalAddress().toString());
+        System.out.println("   Local port = "+s.getLocalPort());
+        System.out.println("   Need client authentication = "
+                +s.getNeedClientAuth());
+        SSLSession ss = s.getSession();
+        System.out.println("   Cipher suite = "+ss.getCipherSuite());
+        System.out.println("   Protocol = "+ss.getProtocol());
     }
 
     public boolean isConnected() {
