@@ -9,7 +9,9 @@ import java.net.Socket;
 import javax.net.ssl.*;
 
 public class Client {
-    private Socket clientSocket;
+    private SSLSocket clientSocket = null;
+    private static final String[] protocols = new String[] {"TLSv1.3"};
+    private static final String[] cipher_suites = new String[] {"TLS_AES_128_GCM_SHA256"};
     private PrintWriter out;
     private BufferedReader in;
     private boolean isConnected;
@@ -18,10 +20,7 @@ public class Client {
     public void connect(String ip) throws CantConnectException, IOException, IncorrectDeviceException {
         //clientSocket = new Socket(ip, PORT);
 
-        SSLSocketFactory f = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        try {
-            SSLSocket clientSocket = (SSLSocket) f.createSocket(ip, PORT);
-
+        try (SSLSocket clientSocket = createSocket(ip, PORT)) {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
@@ -29,8 +28,10 @@ public class Client {
             clientSocket.startHandshake();
 
             isConnected = true;
+            String message = in.readLine(); // welcom msg
             out.println("CONN");
-            String message = in.readLine();
+            message = in.readLine();
+
 
             if (message.equals("CONN_ERR")) {
                 clientSocket.close();
@@ -42,6 +43,14 @@ public class Client {
         } catch (IOException e) {
             System.err.println(e.toString());
         }
+    }
+
+    public static SSLSocket createSocket(String host, int port) throws IOException {
+        SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault()
+                .createSocket(host, port);
+        socket.setEnabledProtocols(protocols);
+        socket.setEnabledCipherSuites(cipher_suites);
+        return socket;
     }
 
     // TO REMOVE
