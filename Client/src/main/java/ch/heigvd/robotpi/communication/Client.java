@@ -6,28 +6,82 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import javax.net.ssl.*;
 
 public class Client {
-    private Socket clientSocket;
+    private SSLSocket clientSocket = null;
+    private static final String[] protocols = new String[] {"TLSv1.3"};
+    private static final String[] cipher_suites = new String[] {"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"}; // TLS_AES_128_GCM_SHA256
     private PrintWriter out;
     private BufferedReader in;
     private boolean isConnected;
     public final int PORT = 2025;
 
     public void connect(String ip) throws CantConnectException, IOException, IncorrectDeviceException {
-        clientSocket = new Socket(ip, PORT);
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        isConnected = true;
-        out.println("CONN");
-        String message = in.readLine();
-        if (message.equals("CONN_ERR")) {
-            clientSocket.close();
-            throw new CantConnectException();
-        } else if (!message.equals("CONN_OK")) {
-            clientSocket.close();
-            throw new IncorrectDeviceException();
+        //clientSocket = new Socket(ip, PORT);
+
+        try (SSLSocket socket = createSocket(ip, PORT)) {
+            this.clientSocket = socket;
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+            printSocketInfo(clientSocket);
+            clientSocket.startHandshake();
+
+
+            isConnected = true;
+
+            String message = in.readLine(); // welcom msg
+            System.out.println("recu: " + message); // REMOVE
+
+            out.println("CONN");
+            out.flush();
+            //while(!in.ready()) {
+            message = in.readLine();
+            System.out.println("recu: " + message); // REMOVE
+            //}
+
+
+            if (message.equals("CONN_ERR")) {
+                clientSocket.close();
+                throw new CantConnectException();
+            } else if (!message.equals("CONN_OK")) {
+                clientSocket.close();
+                throw new IncorrectDeviceException();
+            }
+        } catch (IOException e) {
+            System.err.println(e.toString());
         }
+    }
+
+    public static SSLSocket createSocket(String host, int port) throws IOException {
+        SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault()
+                .createSocket(host, port);
+        socket.setEnabledProtocols(protocols);
+        socket.setEnabledCipherSuites(socket.getSupportedCipherSuites());
+
+        // REMOVE
+        for (String c : socket.getSupportedProtocols())
+        System.out.println(c);
+        return socket;
+    }
+
+    // TO REMOVE
+    private static void printSocketInfo(SSLSocket s) {
+        System.out.println("Socket class: "+s.getClass());
+        System.out.println("   Remote address = "
+                +s.getInetAddress().toString());
+        System.out.println("   Remote port = "+s.getPort());
+        System.out.println("   Local socket address = "
+                +s.getLocalSocketAddress().toString());
+        System.out.println("   Local address = "
+                +s.getLocalAddress().toString());
+        System.out.println("   Local port = "+s.getLocalPort());
+        System.out.println("   Need client authentication = "
+                +s.getNeedClientAuth());
+        SSLSession ss = s.getSession();
+        System.out.println("   Cipher suite = "+ss.getCipherSuite());
+        System.out.println("   Protocol = "+ss.getProtocol());
     }
 
     public boolean isConnected() {
@@ -160,3 +214,44 @@ public class Client {
     private boolean isMoving = false;
 
 }
+
+/*
+TLS_AES_128_GCM_SHA256
+TLS_AES_256_GCM_SHA384
+    TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+    TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+TLS_RSA_WITH_AES_256_GCM_SHA384
+TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
+TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+TLS_RSA_WITH_AES_128_GCM_SHA256
+TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+TLS_RSA_WITH_AES_256_CBC_SHA256
+TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
+    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+TLS_RSA_WITH_AES_256_CBC_SHA
+TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+TLS_RSA_WITH_AES_128_CBC_SHA256
+TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
+TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+TLS_RSA_WITH_AES_128_CBC_SHA
+TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+TLS_RSA_WITH_NULL_SHA256
+TLS_ECDHE_ECDSA_WITH_NULL_SHA
+TLS_ECDHE_RSA_WITH_NULL_SHA
+SSL_RSA_WITH_NULL_SHA
+
+TLSv1.3
+TLSv1.2
+TLSv1.1
+TLSv1
+SSLv3
+SSLv2Hello
+ */
