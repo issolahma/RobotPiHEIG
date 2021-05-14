@@ -8,49 +8,49 @@
 void put_response(char *response, int response_code) {
     switch (response_code) {
         case CONN_OK:
-            strncpy(response, "CONN_OK", CMD_LEN);
+            strncpy(response, "CONN_OK\n", CMD_LEN);
             break;
         case CONN_ERR:
-            strncpy(response, "CONN_ERR", CMD_LEN);
+            strncpy(response, "CONN_ERR\n", CMD_LEN);
             break;
         case FWD_OK:
-            strncpy(response, "FWD_OK", CMD_LEN);
+            strncpy(response, "FWD_OK\n", CMD_LEN);
             break;
         case BKWD_OK:
-            strncpy(response, "BKWD_OK", CMD_LEN);
+            strncpy(response, "BKWD_OK\n", CMD_LEN);
             break;
         case STOP_OK:
-            strncpy(response, "STOP_OK", CMD_LEN);
+            strncpy(response, "STOP_OK\n", CMD_LEN);
             break;
         case ROTATE_LEFT_OK:
-            strncpy(response, "ROTATE_LEFT_OK", CMD_LEN);
+            strncpy(response, "ROTATE_LEFT_OK\n", CMD_LEN);
             break;
         case ROTATE_RIGHT_OK:
-            strncpy(response, "ROTATE_RIGHT_OK", CMD_LEN);
+            strncpy(response, "ROTATE_RIGHT_OK\n", CMD_LEN);
             break;
         case FRONT_L_OK:
-            strncpy(response, "FRONT_L_OK", CMD_LEN);
+            strncpy(response, "FRONT_L_OK\n", CMD_LEN);
             break;
         case FRONT_R_OK:
-            strncpy(response, "FRONT_R_OK", CMD_LEN);
+            strncpy(response, "FRONT_R_OK\n", CMD_LEN);
             break;
         case BCK_L_OK:
-            strncpy(response, "BCK_L_OK", CMD_LEN);
+            strncpy(response, "BCK_L_OK\n", CMD_LEN);
             break;
         case BCK_R_OK:
-            strncpy(response, "BCK_R_OK", CMD_LEN);
+            strncpy(response, "BCK_R_OK\n", CMD_LEN);
             break;
         case DISCONN_OK:
-            strncpy(response, "DISCONN_OK", CMD_LEN);
+            strncpy(response, "DISCONN_OK\n", CMD_LEN);
             break;
         case DISCONN_ERR:
-            strncpy(response, "DISCONN_ERR", CMD_LEN);
+            strncpy(response, "DISCONN_ERR\n", CMD_LEN);
             break;
         case PING:
-            strncpy(response, "PING", CMD_LEN);
+            strncpy(response, "PING\n", CMD_LEN);
             break;
         default:
-            strncpy(response, "CMD_ERR", CMD_LEN);
+            strncpy(response, "CMD_ERR\n", CMD_LEN);
             break;
     }
 }
