@@ -36,5 +36,10 @@ jobs:
           cp x-tools /opt -r
           cd ../../Server
           # sans le sudo -> permission denied...
-          sudo cp -r openssl /opt/x-tools/armv8-rpi3-linux-gnueabihf/armv8-rpi3-linux-gnueabihf/sysroot/usr/include/
+          if test -d openssl; then
+          echo "---OUI---"
+          else
+          echo "---NON---"
+          fi
+          #sudo cp -r openssl /opt/x-tools/armv8-rpi3-linux-gnueabihf/armv8-rpi3-linux-gnueabihf/sysroot/usr/include/
           make
