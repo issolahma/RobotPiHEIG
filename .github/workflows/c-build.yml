@@ -35,5 +35,6 @@ jobs:
           ./toolchain.sh rpi3-armv8-dev --pull --export
           cp x-tools /opt -r
           cd ../../Server
-          cp -r openssl /opt/x-tools/armv8-rpi3-linux-gnueabihf/armv8-rpi3-linux-gnueabihf/sysroot/usr/include/
+          # sans le sudo -> permission denied...
+          sudo cp -r openssl /opt/x-tools/armv8-rpi3-linux-gnueabihf/armv8-rpi3-linux-gnueabihf/sysroot/usr/include/
           make
