@@ -30,11 +30,10 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Server build 
         run: |
-          echo "--openssl--"
-          openssl version
           git clone https://github.com/tttapa/RPi-Cpp-Toolchain.git
           cd RPi-Cpp-Toolchain/toolchain
           ./toolchain.sh rpi3-armv8-dev --pull --export
           cp x-tools /opt -r
           cd ../../Server
+          cp -r openssl /opt/x-tools/armv8-rpi3-linux-gnueabihf/armv8-rpi3-linux-gnueabihf/sysroot/usr/include/
           make
