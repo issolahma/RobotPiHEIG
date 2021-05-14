@@ -11,7 +11,7 @@ import javax.net.ssl.*;
 public class Client {
     private SSLSocket clientSocket = null;
     private static final String[] protocols = new String[] {"TLSv1.3"};
-    private static final String[] cipher_suites = new String[] {"TLS_AES_128_GCM_SHA256"};
+    private static final String[] cipher_suites = new String[] {"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"}; // TLS_AES_128_GCM_SHA256
     private PrintWriter out;
     private BufferedReader in;
     private boolean isConnected;
@@ -20,17 +20,26 @@ public class Client {
     public void connect(String ip) throws CantConnectException, IOException, IncorrectDeviceException {
         //clientSocket = new Socket(ip, PORT);
 
-        try (SSLSocket clientSocket = createSocket(ip, PORT)) {
+        try (SSLSocket socket = createSocket(ip, PORT)) {
+            this.clientSocket = socket;
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
             printSocketInfo(clientSocket);
             clientSocket.startHandshake();
 
+
             isConnected = true;
+
             String message = in.readLine(); // welcom msg
+            System.out.println("recu: " + message); // REMOVE
+
             out.println("CONN");
+            out.flush();
+            //while(!in.ready()) {
             message = in.readLine();
+            System.out.println("recu: " + message); // REMOVE
+            //}
 
 
             if (message.equals("CONN_ERR")) {
@@ -49,7 +58,11 @@ public class Client {
         SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault()
                 .createSocket(host, port);
         socket.setEnabledProtocols(protocols);
-        socket.setEnabledCipherSuites(cipher_suites);
+        socket.setEnabledCipherSuites(socket.getSupportedCipherSuites());
+
+        // REMOVE
+        for (String c : socket.getSupportedProtocols())
+        System.out.println(c);
         return socket;
     }
 
@@ -201,3 +214,44 @@ public class Client {
     private boolean isMoving = false;
 
 }
+
+/*
+TLS_AES_128_GCM_SHA256
+TLS_AES_256_GCM_SHA384
+    TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+    TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+TLS_RSA_WITH_AES_256_GCM_SHA384
+TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
+TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+TLS_RSA_WITH_AES_128_GCM_SHA256
+TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+TLS_RSA_WITH_AES_256_CBC_SHA256
+TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
+    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+TLS_RSA_WITH_AES_256_CBC_SHA
+TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+TLS_RSA_WITH_AES_128_CBC_SHA256
+TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
+TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+TLS_RSA_WITH_AES_128_CBC_SHA
+TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+TLS_RSA_WITH_NULL_SHA256
+TLS_ECDHE_ECDSA_WITH_NULL_SHA
+TLS_ECDHE_RSA_WITH_NULL_SHA
+SSL_RSA_WITH_NULL_SHA
+
+TLSv1.3
+TLSv1.2
+TLSv1.1
+TLSv1
+SSLv3
+SSLv2Hello
+ */

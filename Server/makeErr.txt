@@ -1,4 +1,0 @@
-/opt/x-tools/armv8-rpi3-linux-gnueabihf/bin/../lib/gcc/armv8-rpi3-linux-gnueabihf/9.2.0/../../../../armv8-rpi3-linux-gnueabihf/bin/ld.bfd:/opt/x-tools/armv8-rpi3-linux-gnueabihf/bin/../armv8-rpi3-linux-gnueabihf/sysroot/lib/libc.so.6: file format not recognized; treating as linker script
-/opt/x-tools/armv8-rpi3-linux-gnueabihf/bin/../lib/gcc/armv8-rpi3-linux-gnueabihf/9.2.0/../../../../armv8-rpi3-linux-gnueabihf/bin/ld.bfd:/opt/x-tools/armv8-rpi3-linux-gnueabihf/bin/../armv8-rpi3-linux-gnueabihf/sysroot/lib/libc.so.6:0: syntax error
-collect2: error: ld returned 1 exit status
-make: *** [Makefile:38 : bin/RoboPiServer] Erreur 1

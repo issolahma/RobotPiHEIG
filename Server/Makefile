@@ -2,16 +2,15 @@
 PI_ADDR = 192.168.0.66
 
 # Toolchain and sysroot location
-#TOOLCHAIN = armv8-rpi3-linux-gnueabihf
-#TOOLCHAIN_DIR = /home/maude/Documents/PRO/x-tools/$(TOOLCHAIN)
-#SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/sysroot/
-#BUILDTOOLS = $(TOOLCHAIN_DIR)/bin/$(TOOLCHAIN)
+TOOLCHAIN = armv8-rpi3-linux-gnueabihf
+TOOLCHAIN_DIR = /opt/x-tools/$(TOOLCHAIN)
+SYSROOT = $(TOOLCHAIN_DIR)/$(TOOLCHAIN)/sysroot/
+BUILDTOOLS = $(TOOLCHAIN_DIR)/bin/$(TOOLCHAIN)
 
 CC = gcc
 LD = ld
 CFLAGS = -g -Wall
-LDFLAGS = -lc -pthread -L/usr/include/openssl -L/usr/include/ -lssl -lcrypto
-# LDFLAGS = -lc -pthread -L/home/maude/Documents/PRO/openSSL/openssl -lssl -lcrypto
+LDFLAGS = -lc -pthread
 TARGETFOLDER = bin
 APPNAME = RoboPiServer
 TEST_APPNAME = RoboPiServerTest
